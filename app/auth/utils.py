@@ -11,7 +11,7 @@ from jwt import InvalidTokenError
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.model import User
+from app.auth.model import User, LoginInfo
 from app.auth.schema import TokenData, UserRead, UserCreate, UserResponse
 from app.config import SECRET, ALGORITHM
 from app.database import get_async_session, async_session_maker
@@ -149,3 +149,18 @@ async def create_superuser():
                 await session.commit()
 
 
+async def log_login_info(db: AsyncSession, user_id, email, phone):
+    try:
+        login_info = LoginInfo(user_id=user_id, email=email, phone=phone)
+        db.add(login_info)
+        await db.commit()
+        await db.refresh(login_info)
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_login_info(db: AsyncSession):
+    res = await db.execute(select(LoginInfo))
+    login_info = res.scalars().all()
+    return login_info or []
