@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schema import Token, UserRead, UserCreate
 from app.auth.utils import CustomOAuth2PasswordRequestForm, authenticate_user, create_access_token, \
-    get_current_active_user, create_user, blacklist_token
+    get_current_active_user, create_user, blacklist_token, log_login_info, get_login_info
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
 from user_agents import parse
@@ -31,6 +31,7 @@ async def login(
             detail="Incorrect phone number or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    await log_login_info(db, user.id, user.email, user.phone)
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
         data={"sub": user.phone}, expires_delta=access_token_expires
@@ -74,3 +75,8 @@ async def read_own_items(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
 ):
     return [{"item_id": "Foo", "owner": current_user.username}]
+
+
+@router.get("/login_info/")
+async def get_login_info_endpoint(db: AsyncSession = Depends(get_async_session)):
+    return await get_login_info(db)
