@@ -22,3 +22,14 @@ class User(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc),
                                                           onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
+
+
+class LoginInfo(Base):
+    __tablename__ = 'login_info'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer)
+    email: Mapped[str] = mapped_column(String(length=255))
+    phone: Mapped[str] = mapped_column(String(length=13))
+    login_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
+                                                        default=lambda: datetime.datetime.now(datetime.timezone.utc))
