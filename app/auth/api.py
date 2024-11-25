@@ -1,7 +1,8 @@
 from datetime import timedelta
 from typing import Annotated
+import requests
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +11,7 @@ from app.auth.utils import CustomOAuth2PasswordRequestForm, authenticate_user, c
     get_current_active_user, create_user, blacklist_token
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
+from user_agents import parse
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -17,9 +19,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/login")
 async def login(
+        request: Request,
         form_data: Annotated[CustomOAuth2PasswordRequestForm, Depends()],
         db: AsyncSession = Depends(get_async_session),
 ) -> Token:
+    print(parse(request.headers.get("user-agent")))
     user = await authenticate_user(db, form_data.phone, form_data.password)
     if not user:
         raise HTTPException(
