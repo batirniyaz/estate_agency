@@ -1,6 +1,5 @@
 from datetime import timedelta
 from typing import Annotated
-import requests
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
