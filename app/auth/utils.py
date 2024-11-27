@@ -14,20 +14,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.model import User, LoginInfo
 from app.auth.schema import TokenData, UserRead, UserCreate, UserResponse
 from app.config import SECRET, ALGORITHM
-from app.database import get_async_session, async_session_maker
+from app.database import get_async_session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 token_blacklist: Set[str] = set()
-
-
-def blacklist_token(token: str):
-    token_blacklist.add(token)
-
-
-def is_token_blacklisted(token: str) -> bool:
-    return token in token_blacklist
 
 
 class CustomOAuth2PasswordRequestForm:
@@ -38,6 +30,14 @@ class CustomOAuth2PasswordRequestForm:
     ):
         self.phone = phone
         self.password = password
+
+
+def blacklist_token(token: str):
+    token_blacklist.add(token)
+
+
+def is_token_blacklisted(token: str) -> bool:
+    return token in token_blacklist
 
 
 def verify_password(plain_password, hashed_password):
@@ -127,26 +127,6 @@ async def create_user(db: AsyncSession, user: UserCreate):
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-async def create_superuser():
-
-    async with async_session_maker() as session:
-        async with session.begin():
-            result = await session.execute(select(User).filter_by(is_superuser=True))
-            superuser = result.scalars().first()
-
-            if not superuser:
-                superuser = User(
-                    phone="+998999999999",
-                    email="admin@example.com",
-                    full_name="Super User",
-                    hashed_password=get_password_hash("admin"),
-                    is_superuser=True,
-                    disabled=False
-                )
-                session.add(superuser)
-                await session.commit()
 
 
 async def log_login_info(db: AsyncSession, user_id, email, phone):
