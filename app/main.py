@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.auth import router as auth_router
-from app.auth.utils import create_superuser
+from app.auth.superuser import create_superuser
 from app.database import create_db_and_tables
 # from app.api import router
 
