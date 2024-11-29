@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.schema import Token, UserRead, UserCreate
+from app.auth.schema import Token, UserRead, UserCreate, UserUpdate
 from app.auth.utils import CustomOAuth2PasswordRequestForm, authenticate_user, create_access_token, \
-    get_current_active_user, create_user, blacklist_token, log_login_info, get_login_info
+    get_current_active_user, create_user, blacklist_token, log_login_info, get_login_info, get_users, get_user_by_id, \
+    update_user, delete_user
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
 from user_agents import parse
@@ -47,7 +48,10 @@ async def logout(
     return {"msg": "Successfully logged out"}
 
 
-@router.post("/create")
+router_user = APIRouter()
+
+
+@router_user.post("/")
 async def register_user(
         user: UserCreate,
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
@@ -62,6 +66,66 @@ async def register_user(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
+@router_user.get("/")
+async def get_users_endpoint(
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
+        db: AsyncSession = Depends(get_async_session),
+):
+    try:
+        if not current_user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
+        return await get_users(db)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router_user.get('/{user_id}')
+async def get_user_by_id_endpoint(
+        user_id: int,
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
+        db: AsyncSession = Depends(get_async_session),
+):
+    try:
+        if not current_user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
+        return await get_user_by_id(db, user_id)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router_user.put('/{user_id}')
+async def update_user_endpoint(
+        user_id: int,
+        user: UserUpdate,
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
+        db: AsyncSession = Depends(get_async_session),
+):
+    try:
+        if not current_user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update users")
+        return await update_user(db, user_id, user)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router_user.delete('/{user_id}')
+async def delete_user_endpoint(
+        user_id: int,
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
+        db: AsyncSession = Depends(get_async_session),
+):
+    try:
+        if not current_user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete users")
+        return await delete_user(db, user_id)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
 @router.get("/me/", response_model=UserRead)
 async def read_users_me(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
@@ -69,13 +133,12 @@ async def read_users_me(
     return current_user
 
 
-@router.get("/me/items/")
-async def read_own_items(
-        current_user: Annotated[UserRead, Depends(get_current_active_user)],
-):
-    return [{"item_id": "Foo", "owner": current_user.username}]
-
-
 @router.get("/login_info/")
-async def get_login_info_endpoint(db: AsyncSession = Depends(get_async_session)):
+async def get_login_info_endpoint(
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
+        db: AsyncSession = Depends(get_async_session)
+):
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view login info")
     return await get_login_info(db)
