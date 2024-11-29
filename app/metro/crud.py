@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -14,8 +15,13 @@ async def create_metro(db: AsyncSession, metro: MetroCreate):
         await db.refresh(db_metro)
 
         return db_metro
+    except IntegrityError as e:
+        if "duplicate key value violates unique constraint" in str(e):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Metro already exists")
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 async def get_metros(db: AsyncSession):
