@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.model import User, LoginInfo
-from app.auth.schema import TokenData, UserRead, UserCreate, UserResponse
+from app.auth.schema import TokenData, UserRead, UserCreate, UserResponse, UserUpdate
 from app.config import SECRET, ALGORITHM
 from app.database import get_async_session
 
@@ -127,6 +127,54 @@ async def create_user(db: AsyncSession, user: UserCreate):
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_users(db: AsyncSession):
+    res = await db.execute(select(User))
+    users = res.scalars().all()
+    return users or []
+
+
+async def get_user_by_id(db: AsyncSession, user_id: int):
+    res = await db.execute(select(User).filter_by(id=user_id))
+    user = res.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return user
+
+
+async def update_user(db: AsyncSession, user_id: int, user: UserUpdate):
+    try:
+        res_phone = await db.execute(select(User).filter_by(phone=user.phone))
+        user_phone = res_phone.scalars().first()
+        if user_phone:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this phone')
+
+        res_email = await db.execute(select(User).filter_by(email=user.email))
+        user_email = res_email.scalars().first()
+        if user_email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this email')
+
+        user_db = await get_user_by_id(db, user_id)
+        hashed_pass = get_password_hash(user.hashed_password)
+
+        user.hashed_password = hashed_pass
+        for key, value in user.model_dump(exclude_unset=True).items():
+            setattr(user_db, key, value)
+
+        await db.commit()
+        return user_db
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+async def delete_user(db: AsyncSession, user_id: int):
+    user = await get_user_by_id(db, user_id)
+    await db.delete(user)
+    await db.commit()
+    return HTTPException(status_code=status.HTTP_200_OK, detail="User deleted")
 
 
 async def log_login_info(db: AsyncSession, user_id, email, phone):
