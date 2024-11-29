@@ -16,11 +16,13 @@ async def create_metro(db: AsyncSession, metro: MetroCreate):
 
         return db_metro
     except IntegrityError as e:
+        await db.rollback()
         if "duplicate key value violates unique constraint" in str(e):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Metro already exists")
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     except Exception as e:
+        await db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
@@ -54,6 +56,7 @@ async def update_metro(db: AsyncSession, metro_id: int, metro: MetroUpdate):
 
         return db_metro
     except Exception as e:
+        await db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 

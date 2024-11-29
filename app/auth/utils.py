@@ -122,10 +122,12 @@ async def create_user(db: AsyncSession, user: UserCreate):
         await db.refresh(user)
         return UserResponse(**user.__dict__)
     except IntegrityError as e:
+        await db.rollback()
         if "unique constraint" in str(e.orig):
             raise HTTPException(status_code=400, detail="User phone or email already exists")
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
+        await db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -167,6 +169,7 @@ async def update_user(db: AsyncSession, user_id: int, user: UserUpdate):
         await db.commit()
         return user_db
     except Exception as e:
+        await db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
