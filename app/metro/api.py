@@ -26,6 +26,7 @@ async def create_metro_endpoint(
 
 @router.get("/", response_model=list[MetroResponse])
 async def get_metros_endpoint(
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: AsyncSession = Depends(get_async_session)
 ):
     return await get_metros(db)
@@ -34,6 +35,7 @@ async def get_metros_endpoint(
 @router.get("/{metro_id}", response_model=MetroResponse)
 async def get_metro_endpoint(
         metro_id: int,
+        current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: AsyncSession = Depends(get_async_session)
 ):
     return await get_metro(db, metro_id)
