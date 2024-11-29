@@ -43,6 +43,9 @@ async def get_metro(db: AsyncSession, metro_id: int):
 async def update_metro(db: AsyncSession, metro_id: int, metro: MetroUpdate):
     try:
         db_metro = await get_metro(db, metro_id)
+        db_metros = await get_metros(db)
+        if metro.name in [d.name for d in db_metros]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Metro already exists")
 
         for key, value in metro.model_dump(exclude_unset=True).items():
             setattr(db_metro, key, value)
