@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth.superuser import create_superuser
 from app.database import create_db_and_tables
@@ -20,6 +21,16 @@ app = FastAPI(
     summary="This is a mini CRM system for estate agencies",
     lifespan=lifespan,
 )
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(router)
 
