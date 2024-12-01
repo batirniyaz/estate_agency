@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.auth.superuser import create_superuser
 from app.database import create_db_and_tables
@@ -33,4 +34,5 @@ app.add_middleware(
 
 
 app.include_router(router)
+app.mount("/storage", StaticFiles(directory="app/storage"), name="storage")
 
