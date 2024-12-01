@@ -39,7 +39,7 @@ class Land(Base):
     title: Mapped[str] = mapped_column(String(length=255))
     category: Mapped[Category] = mapped_column(Enum(Category), default=Category.LAND)
     action_type: Mapped[ActionType] = mapped_column(Enum(ActionType))
-    images: Mapped[list['LandImage']] = relationship('Image', back_populates='land', lazy='selectin')
+    images: Mapped[list['LandImage']] = relationship('LandImage', back_populates='land', lazy='selectin')
     description: Mapped[str] = mapped_column(String)
     comment: Mapped[str] = mapped_column(String)
     price: Mapped[int] = mapped_column(Integer)
