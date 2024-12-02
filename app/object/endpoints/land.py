@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_async_session
@@ -10,8 +10,8 @@ from app.object.schemas.land import LandCreate, LandResponse
 router = APIRouter()
 
 
-@router.post("/", response_model=LandResponse, status_code=status.HTTP_201_CREATED)
-async def create_land_endpoint(land: LandCreate,
+@router.post("/")
+async def create_land_endpoint(land: LandCreate = Query(...),
                                media: List[UploadFile] = File(...),
                                db: AsyncSession = Depends(get_async_session)):
     return await create_land(db, land, media)
