@@ -11,10 +11,11 @@ if not (BASE_DIR / "storage").exists():
 MEDIA_DIR = BASE_DIR / "storage"
 
 
-def save_upload_file(upload_file: [UploadFile], land_id) -> [str]:
+def save_upload_file(upload_file: [UploadFile], land_id) -> [dict]:
     urls = []
     counter = 0
     for file in upload_file:
+        media_type = "image" if file.content_type.startswith("image") else "video"
         if " " in file.filename:
             file.filename = file.filename.replace(" ", "_")
 
@@ -30,7 +31,7 @@ def save_upload_file(upload_file: [UploadFile], land_id) -> [str]:
         with open(file_location, "wb") as buffer:
             buffer.write(file.file.read())
 
-        urls.append(url)
+        urls.append({"url": url, "media_type": media_type})
         counter += 1
 
     return urls
