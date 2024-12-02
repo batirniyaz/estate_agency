@@ -10,7 +10,7 @@ from app.config import DB_USER, DB_PORT, DB_NAME, DB_HOST, DB_PASS
 from app.metro.model import Metro
 from app.district.model import District
 from app.auth.model import User
-from app.object.models.land import Land, LandImage
+from app.object.models.land import Land, LandMedia
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition
 
 # this is the Alembic Config object, which provides
