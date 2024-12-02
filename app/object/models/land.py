@@ -13,6 +13,7 @@ class LandMedia(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     url: Mapped[str] = mapped_column(String)
+    media_type: Mapped[str] = mapped_column(String, nullable=True)
     land_id: Mapped[int] = mapped_column(Integer, ForeignKey('land.id'))
 
     land: Mapped['Land'] = relationship(back_populates='media', lazy='selectin')
