@@ -31,6 +31,7 @@ class UserRead(UserCreate):
     id: int = Field(..., description="The ID of the user")
     disabled: bool = Field(..., description="The status of the user")
     is_superuser: bool = Field(..., description="The role of the user")
+    full_name: str = Field(..., description="The full name of the user")
     created_at: datetime.datetime = Field(..., description="The time the user was created")
     updated_at: datetime.datetime = Field(..., description="The time the user was updated")
 
