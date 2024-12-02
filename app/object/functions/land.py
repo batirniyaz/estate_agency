@@ -1,3 +1,5 @@
+import os
+
 from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import event
@@ -23,31 +25,29 @@ def generate_crm_id(mapper, connection, target):
 event.listen(Land, 'before_insert', generate_crm_id)
 
 
-async def create_land(db: AsyncSession, land: LandCreate, media: [UploadFile]):
+async def create_land(db: AsyncSession, land: LandCreate, media: [UploadFile], current_user):
     try:
-        print(land.phone_number[1:])
         land_validation = await validate_land(db, land)
 
         if land_validation:
-            land.responsible = 'agent'
+            land.responsible = current_user.full_name
             db_land = Land(**land.model_dump())
             db.add(db_land)
             await db.commit()
             await db.refresh(db_land)
 
             urls = save_upload_file(media, db_land.id)
-            for ulr in urls:
-                db_land_image = LandMedia(land_id=db_land.id, url=ulr)
-                db.add(db_land_image)
+            for url in urls:
+                db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
+                db.add(db_land_media)
                 await db.commit()
-                await db.refresh(db_land_image)
+                await db.refresh(db_land_media)
 
-                db_land.media.append(db_land_image)
+                db_land.media.append(db_land_media)
 
             await db.commit()
             await db.refresh(db_land)
 
-            print(db_land)
             land_response = LandResponse.model_validate(db_land)
             return jsonable_encoder(land_response)
     except IntegrityError as e:
@@ -72,3 +72,36 @@ async def get_land(db: AsyncSession, land_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Land not found")
 
     return land
+
+
+async def update_land(db: AsyncSession, land_id: int, land: LandUpdate):
+    db_land = await get_land(db, land_id)
+
+    try:
+
+        land_validation = await validate_land(db, land)
+        if land_validation:
+
+            for key, value in land.model_dump(exclude_unset=True).items():
+                setattr(db_land, key, value)
+
+            await db.commit()
+            await db.refresh(db_land)
+
+            return db_land
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+async def delete_land(db: AsyncSession, land_id: int):
+    db_land = await get_land(db, land_id)
+    for media in db_land.media:
+        file_path = os.path.join("app/storage", "images" if media.media_type == 'image' else 'videos', os.path.basename(media.url))
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        await db.delete(media)
+        await db.commit()
+    await db.delete(db_land)
+    await db.commit()
+    return {"detail": "Land deleted"}
