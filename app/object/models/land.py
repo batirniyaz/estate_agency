@@ -8,14 +8,14 @@ from app.database import Base
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition
 
 
-class LandImage(Base):
-    __tablename__ = 'land_image'
+class LandMedia(Base):
+    __tablename__ = 'land_media'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     url: Mapped[str] = mapped_column(String)
     land_id: Mapped[int] = mapped_column(Integer, ForeignKey('land.id'))
 
-    land: Mapped['Land'] = relationship('Land', back_populates='images', lazy='selectin')
+    land: Mapped['Land'] = relationship(back_populates='media', lazy='selectin')
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
@@ -39,7 +39,7 @@ class Land(Base):
     title: Mapped[str] = mapped_column(String(length=255))
     category: Mapped[Category] = mapped_column(Enum(Category), default=Category.LAND)
     action_type: Mapped[ActionType] = mapped_column(Enum(ActionType))
-    images: Mapped[list['LandImage']] = relationship('LandImage', back_populates='land', lazy='selectin')
+    media: Mapped[list['LandMedia']] = relationship(back_populates='land', lazy='selectin')
     description: Mapped[str] = mapped_column(String)
     comment: Mapped[str] = mapped_column(String)
     price: Mapped[int] = mapped_column(Integer)
