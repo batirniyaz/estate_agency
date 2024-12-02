@@ -58,6 +58,13 @@ async def create_land(db: AsyncSession, land: LandCreate, media: [UploadFile]):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
+async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
+    result = await db.execute(select(Land).limit(limit).offset((page - 1) * limit))
+    lands = result.scalars().all()
+
+    return lands if lands else []
+
+
 async def get_land(db: AsyncSession, land_id: int):
     result = await db.execute(select(Land).filter_by(id=land_id))
     land = result.scalars().first()
