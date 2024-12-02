@@ -6,14 +6,6 @@ from typing import List, Optional
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition
 
 
-class LandImageCreate(BaseModel):
-    file: UploadFile = File(..., description="The image file to upload")
-
-
-class LandImageUpdate(LandImageCreate):
-    pass
-
-
 class LandMediaResponse(BaseModel):
     id: int = Field(..., description="The ID of the image", examples=[1])
     url: str = Field(..., description="The URL of the image", examples=["http://example.com/image.jpg"])
@@ -23,6 +15,19 @@ class LandMediaResponse(BaseModel):
     updated_at: datetime.datetime = Field(..., description="The time the image was updated",
                                           examples=["2021-08-01T12:00:00"])
 
+    class Config:
+        from_attributes = True
+        arbitrary_types_allowed = True
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "url": "http://example.com/image.jpg",
+                "land_id": 1,
+                "created_at": "2021-08-01T12:00:00",
+                "updated_at": "2021-08-01T12:00:00"
+            }
+        }
+
 
 class LandBase(BaseModel):
     district: str = Field(..., min_length=3, max_length=100, description="The district name of the land",
@@ -31,24 +36,23 @@ class LandBase(BaseModel):
                           examples=["Buyuk Ipak Yuli"])
     title: str = Field(..., min_length=3, max_length=100, description="The title of the land",
                        examples=["Land for sale"])
-    category: Category = Field(..., min_length=3, max_length=100, description="The category of the land",
+    category: Category = Field(..., description="The category of the land",
                                examples=["LAND", "APARTMENT", "COMMERCIAL"])
-    action_type: ActionType = Field(..., min_length=3, max_length=100, description="The action type of the land",
+    action_type: ActionType = Field(..., description="The action type of the land",
                                     examples=["SALE", "RENT"])
-    description: str = Field(..., min_length=3, description="The description of the land", examples=["Land for sale"])
-    comment: str = Field(..., min_length=3, description="The comment of the land", examples=["Land for sale"])
+    description: Optional[str] = Field(..., min_length=3, description="The description of the land", examples=["Land for sale"])
+    comment: Optional[str] = Field(..., min_length=3, description="The comment of the land", examples=["Land for sale"])
     price: int = Field(..., description="The price of the land", examples=[100000])
-    house_type: HouseType = Field(..., min_length=3, max_length=100, description="The house type of the land",
+    house_type: HouseType = Field(..., description="The house type of the land",
                                   examples=["NEW_BUILDING", "SECONDARY"])
     rooms: int = Field(..., description="The number of rooms in the land", examples=[1, 2, 3, 4, 5, 6])
     square_area: int = Field(..., description="The square area of the land", examples=[100])
     floor_number: int = Field(..., description="The floor number of the land", examples=[23])
     floor: int = Field(..., description="The floor of the land", examples=[10])
-    bathroom: BathroomType = Field(..., min_length=3, max_length=100, description="The bathroom type of the land",
+    bathroom: BathroomType = Field(..., description="The bathroom type of the land",
                                    examples=["SEPERATED", "COMBINED", "MANY"])
-    furnished: bool = Field(..., description="The furnished status of the land", examples=[True, False])
-    house_condition: HouseCondition = Field(..., min_length=3, max_length=100,
-                                            description="The house condition of the land",
+    furnished: bool = Field(True, description="The furnished status of the land", examples=[True, False])
+    house_condition: HouseCondition = Field(..., description="The house condition of the land",
                                             examples=["EURO", "NORMAL", "REPAIR"])
     name: str = Field(..., min_length=3, max_length=100, description="The name of the contact person",
                       examples=["John Doe"])
@@ -58,7 +62,8 @@ class LandBase(BaseModel):
 
 
 class LandCreate(LandBase):
-    pass
+    crm_id: str = Field(None, max_length=255, description="The CRM ID of the land")
+    responsible: Optional[str] = Field(None, min_length=3, max_length=100,)
 
 
 class LandUpdate(LandBase):
@@ -68,28 +73,24 @@ class LandUpdate(LandBase):
                                     description="The name of the nearest metro station", examples=["Buyuk Ipak Yuli"])
     title: Optional[str] = Field(None, min_length=3, max_length=100, description="The title of the land",
                                  examples=["Land for sale"])
-    category: Optional[Category] = Field(None, min_length=3, max_length=100, description="The category of the land",
+    category: Optional[Category] = Field(None, description="The category of the land",
                                          examples=["LAND", "APARTMENT", "COMMERCIAL"])
-    action_type: Optional[ActionType] = Field(None, min_length=3, max_length=100,
-                                              description="The action type of the land", examples=["SALE", "RENT"])
+    action_type: Optional[ActionType] = Field(None, description="The action type of the land", examples=["SALE", "RENT"])
     description: Optional[str] = Field(None, min_length=3, description="The description of the land",
                                        examples=["Land for sale"])
     comment: Optional[str] = Field(None, min_length=3, description="The comment of the land",
                                    examples=["Land for sale"])
     price: Optional[int] = Field(None, description="The price of the land", examples=[100000])
-    house_type: Optional[HouseType] = Field(None, min_length=3, max_length=100,
-                                            description="The house type of the land",
+    house_type: Optional[HouseType] = Field(None, description="The house type of the land",
                                             examples=["NEW_BUILDING", "SECONDARY"])
     rooms: Optional[int] = Field(None, description="The number of rooms in the land", examples=[1, 2, 3, 4, 5, 6])
     square_area: Optional[int] = Field(None, description="The square area of the land", examples=[100])
     floor_number: Optional[int] = Field(None, description="The floor number of the land", examples=[23])
     floor: Optional[int] = Field(None, description="The floor of the land", examples=[10])
-    bathroom: Optional[BathroomType] = Field(None, min_length=3, max_length=100,
-                                             description="The bathroom type of the land",
+    bathroom: Optional[BathroomType] = Field(None, description="The bathroom type of the land",
                                              examples=["SEPERATED", "COMBINED", "MANY"])
     furnished: Optional[bool] = Field(None, description="The furnished status of the land", examples=[True, False])
-    house_condition: Optional[HouseCondition] = Field(None, min_length=3, max_length=100,
-                                                      description="The house condition of the land",
+    house_condition: Optional[HouseCondition] = Field(None, description="The house condition of the land",
                                                       examples=["EURO", "NORMAL", "REPAIR"])
     name: Optional[str] = Field(None, min_length=3, max_length=100, description="The name of the contact person",
                                 examples=["John Doe"])
@@ -101,10 +102,16 @@ class LandUpdate(LandBase):
 
 class LandResponse(LandBase):
     id: int = Field(..., description="The ID of the land", examples=[1])
-    media: List[LandMediaResponse] = Field(..., description="The images of the land")
+    crm_id: Optional[str] = Field(..., max_length=255, description="The CRM ID of the land", examples=["A1"])
+    media: Optional[List[LandMediaResponse]] = Field(None, description="The images of the land")
     responsible: Optional[str] = Field(None, min_length=3, max_length=100,
                                        description="The name of the responsible person", examples=["John Doe"])
     created_at: datetime.datetime = Field(..., description="The created date of the land",
                                           examples=["2022-01-01T00:00:00"])
     updated_at: datetime.datetime = Field(..., description="The updated date of the land",
                                           examples=["2022-01-01T00:00:00"])
+
+    class Config:
+        from_attributes = True
+        arbitrary_types_allowed = True
+        use_enum_values = True
