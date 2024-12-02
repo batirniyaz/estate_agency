@@ -9,6 +9,7 @@ from app.object.models import Category, ActionType, HouseType, BathroomType, Hou
 class LandMediaResponse(BaseModel):
     id: int = Field(..., description="The ID of the image", examples=[1])
     url: str = Field(..., description="The URL of the image", examples=["http://example.com/image.jpg"])
+    media_type: str = Field(..., description="The type of the media", examples=["image"])
     land_id: int = Field(..., description="The ID of the land", examples=[1])
     created_at: datetime.datetime = Field(..., description="The time the image was created",
                                           examples=["2021-08-01T12:00:00"])
@@ -22,6 +23,7 @@ class LandMediaResponse(BaseModel):
             "example": {
                 "id": 1,
                 "url": "http://example.com/image.jpg",
+                "media_type": "image",
                 "land_id": 1,
                 "created_at": "2021-08-01T12:00:00",
                 "updated_at": "2021-08-01T12:00:00"
