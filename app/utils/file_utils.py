@@ -11,19 +11,26 @@ if not (BASE_DIR / "storage").exists():
 MEDIA_DIR = BASE_DIR / "storage"
 
 
-def save_upload_file(upload_file: [UploadFile]) -> [str]:
+def save_upload_file(upload_file: [UploadFile], land_id) -> [str]:
     urls = []
+    counter = 0
     for file in upload_file:
+        if " " in file.filename:
+            file.filename = file.filename.replace(" ", "_")
+
+        filename, file_extension = file.filename.split(".")
+
         if file.content_type.startswith("image"):
-            file_location = f"{MEDIA_DIR}/images/{file.filename}"
-            url = f"storage/images/{file.filename}"
+            file_location = f"{MEDIA_DIR}/images/{filename}_{land_id}_{counter}.{file_extension}"
+            url = f"storage/images/{filename}_{land_id}_{counter}.{file_extension}"
         else:
-            file_location = f"{MEDIA_DIR}/videos/{file.filename}"
-            url = f"storage/videos/{file.filename}"
+            file_location = f"{MEDIA_DIR}/videos/{filename}_{land_id}_{counter}.{file_extension}"
+            url = f"storage/videos/{filename}_{land_id}_{counter}.{file_extension}"
 
         with open(file_location, "wb") as buffer:
             buffer.write(file.file.read())
 
         urls.append(url)
+        counter += 1
 
     return urls
