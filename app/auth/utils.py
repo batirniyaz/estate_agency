@@ -1,5 +1,6 @@
 from datetime import timedelta, timezone, datetime
 from typing import Annotated, Set
+import pytz
 
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
@@ -65,10 +66,11 @@ async def authenticate_user(db: AsyncSession, phone: str, password: str):
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
+    current_tz = pytz.timezone('Asia/Tashkent')
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(current_tz) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(current_tz) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET, algorithm=ALGORITHM)
     return encoded_jwt
