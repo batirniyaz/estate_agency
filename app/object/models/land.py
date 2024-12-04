@@ -62,6 +62,7 @@ class Land(Base):
     # Agent
     responsible: Mapped[str] = mapped_column(String)
     agent_percent: Mapped[int] = mapped_column(Integer, nullable=True)
+    agent_commission: Mapped[int] = mapped_column(Integer, nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))

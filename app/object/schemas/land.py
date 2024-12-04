@@ -58,14 +58,15 @@ class LandBase(BaseModel):
                                             examples=["EURO", "NORMAL", "REPAIR"])
     name: str = Field(..., min_length=3, max_length=100, description="The name of the contact person",
                       examples=["John Doe"])
-    phone_number: str = Field(..., min_length=3, max_length=100, description="The phone number of the contact person",
+    phone_number: str = Field(..., min_length=3, max_length=13, description="The phone number of the contact person",
                               examples=["+998901234567"])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the land", examples=[10])
 
 
 class LandCreate(LandBase):
     crm_id: str = Field(None, max_length=255, description="The CRM ID of the land")
-    responsible: Optional[str] = Field(None, min_length=3, max_length=100,)
+    responsible: Optional[str] = Field(None, min_length=3, max_length=100)
+    agent_commission: Optional[int] = Field(None, description="The agent commission of the land", examples=[100])
 
 
 class LandUpdate(LandBase):
@@ -96,7 +97,7 @@ class LandUpdate(LandBase):
                                                       examples=["EURO", "NORMAL", "REPAIR"])
     name: Optional[str] = Field(None, min_length=3, max_length=100, description="The name of the contact person",
                                 examples=["John Doe"])
-    phone_number: Optional[str] = Field(None, min_length=3, max_length=100,
+    phone_number: Optional[str] = Field(None, min_length=3, max_length=13,
                                         description="The phone number of the contact person",
                                         examples=["+998901234567"])
     agent_percent: Optional[int] = Field(None, description="The agent percent of the land", examples=[10])
@@ -108,6 +109,7 @@ class LandResponse(LandBase):
     media: Optional[List[LandMediaResponse]] = Field(None, description="The images of the land")
     responsible: Optional[str] = Field(None, min_length=3, max_length=100,
                                        description="The name of the responsible person", examples=["John Doe"])
+    agent_commission: Optional[int] = Field(None, description="The agent commission of the land", examples=[100])
     created_at: datetime.datetime = Field(..., description="The created date of the land",
                                           examples=["2022-01-01T00:00:00"])
     updated_at: datetime.datetime = Field(..., description="The updated date of the land",
