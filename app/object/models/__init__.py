@@ -27,3 +27,27 @@ class HouseCondition(Enum):
     EURO = 'euro'
     NORMAL = 'normal'
     REPAIR = 'repair'
+
+
+class LocationCommercial(Enum):
+    BUSINESS_CENTER = 'business_center'
+    ADMINISTRATIVE_BUILDING = 'administrative_building'
+    RESIDENTIAL_BUILDING = 'residential_building'
+    COTTAGE = 'cottage'
+    SHOPPING_MALL = 'shopping_mall'
+    INDUSTRIAL_ZONE = 'industrial_zone'
+    MARKET = 'market'
+    DETACHED_BUILDING = 'detached_building'
+
+
+class LocationLand(Enum):
+    CITY = 'city'
+    SUBURB = 'suburb'
+    COUNTRYSIDE = 'countryside'
+    ALONG_ROAD = 'along_road'
+    NEAR_POND = 'near_pond'
+    FOOTHILLS = 'foothills'
+    COTTAGE_AREA = 'cottage_area'
+    CLOSED_AREA = 'closed_area'
+
+
