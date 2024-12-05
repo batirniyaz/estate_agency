@@ -5,7 +5,7 @@ from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey
 
 from app.database import Base
 
-from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition
+from app.object.models import Category, ActionType, LocationLand, HouseCondition
 
 
 class LandMedia(Base):
@@ -34,30 +34,25 @@ class Land(Base):
 
     # Location of the land
     district: Mapped[str] = mapped_column(String(length=255))
-    metro_st: Mapped[str] = mapped_column(String(length=255))
 
     # Details of the land
-    title: Mapped[str] = mapped_column(String(length=255))
+    title: Mapped[str] = mapped_column(String(length=50))
     category: Mapped[Category] = mapped_column(Enum(Category), default=Category.LAND)
     action_type: Mapped[ActionType] = mapped_column(Enum(ActionType))
     media: Mapped[list['LandMedia']] = relationship(back_populates='land', lazy='selectin')
-    description: Mapped[str] = mapped_column(String)
-    comment: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String(length=6000), nullable=True)
+    comment: Mapped[str] = mapped_column(String(length=6000), nullable=True)
     price: Mapped[int] = mapped_column(Integer)
 
     # Additional information
-    house_type: Mapped[HouseType] = mapped_column(Enum(HouseType))
     rooms: Mapped[int] = mapped_column(Integer)
     square_area: Mapped[int] = mapped_column(Integer)
+    live_square_area: Mapped[int] = mapped_column(Integer)
     floor_number: Mapped[int] = mapped_column(Integer)
-    floor: Mapped[int] = mapped_column(Integer)
-    bathroom: Mapped[BathroomType] = mapped_column(Enum(BathroomType))
+    location: Mapped[LocationLand] = mapped_column(Enum(LocationLand))
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
-
-    # Contact information
-    name: Mapped[str] = mapped_column(String(length=255))
-    phone_number: Mapped[str] = mapped_column(String(length=13))
+    parking_place: Mapped[bool] = mapped_column(Boolean)
 
     # Agent
     responsible: Mapped[str] = mapped_column(String)
@@ -69,3 +64,4 @@ class Land(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc),
                                                           onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
+
