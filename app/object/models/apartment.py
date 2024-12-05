@@ -28,15 +28,15 @@ class ApartmentMedia(Base):
 class Apartment(Base):
     __tablename__ = 'apartment'
 
-    # ID of the land
+    # ID of the apartment
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     crm_id: Mapped[str] = mapped_column(String(length=255), unique=True)
 
-    # Location of the land
+    # Location of the apartment
     district: Mapped[str] = mapped_column(String(length=255))
     metro_st: Mapped[str] = mapped_column(String(length=255))
 
-    # Details of the land
+    # Details of the apartment
     title: Mapped[str] = mapped_column(String(length=255))
     category: Mapped[Category] = mapped_column(Enum(Category), default=Category.APARTMENT)
     action_type: Mapped[ActionType] = mapped_column(Enum(ActionType))
