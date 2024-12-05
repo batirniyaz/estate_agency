@@ -1,4 +1,4 @@
-from datetime import timedelta, timezone, datetime
+from datetime import timedelta, datetime
 from typing import Annotated, Set
 import pytz
 
@@ -18,7 +18,7 @@ from app.config import SECRET, ALGORITHM
 from app.database import get_async_session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 token_blacklist: Set[str] = set()
 
