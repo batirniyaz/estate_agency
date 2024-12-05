@@ -5,13 +5,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 if not (BASE_DIR / "storage").exists():
     (BASE_DIR / "storage").mkdir()
-    (BASE_DIR / "storage" / "images").mkdir()
-    (BASE_DIR / "storage" / "videos").mkdir()
+    (BASE_DIR / "storage" / "apartment").mkdir()
+    (BASE_DIR / "storage" / "land").mkdir()
+    (BASE_DIR / "storage" / "commercial").mkdir()
 
 MEDIA_DIR = BASE_DIR / "storage"
 
 
-def save_upload_file(upload_file: [UploadFile], land_id) -> [dict]:
+def save_upload_file(upload_file: [UploadFile], object_id, category) -> [dict]:
     urls = []
     counter = 0
     for file in upload_file:
@@ -21,12 +22,8 @@ def save_upload_file(upload_file: [UploadFile], land_id) -> [dict]:
 
         filename, file_extension = file.filename.split(".")
 
-        if file.content_type.startswith("image"):
-            file_location = f"{MEDIA_DIR}/images/{filename}_{land_id}_{counter}.{file_extension}"
-            url = f"storage/images/{filename}_{land_id}_{counter}.{file_extension}"
-        else:
-            file_location = f"{MEDIA_DIR}/videos/{filename}_{land_id}_{counter}.{file_extension}"
-            url = f"storage/videos/{filename}_{land_id}_{counter}.{file_extension}"
+        file_location = f"{MEDIA_DIR}/{category}/{filename}_{object_id}_{counter}.{file_extension}"
+        url = f"storage/{category}/{filename}_{object_id}_{counter}.{file_extension}"
 
         with open(file_location, "wb") as buffer:
             buffer.write(file.file.read())
