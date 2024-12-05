@@ -61,12 +61,12 @@ class LandBase(BaseModel):
     phone_number: str = Field(..., min_length=3, max_length=13, description="The phone number of the contact person",
                               examples=["+998901234567"])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the land", examples=[10])
+    agent_commission: Optional[int] = Field(None, description="The agent commission of the land", examples=[100])
 
 
 class LandCreate(LandBase):
     crm_id: str = Field(None, max_length=255, description="The CRM ID of the land")
     responsible: Optional[str] = Field(None, min_length=3, max_length=100)
-    agent_commission: Optional[int] = Field(None, description="The agent commission of the land", examples=[100])
 
 
 class LandUpdate(LandBase):
