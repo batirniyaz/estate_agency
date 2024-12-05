@@ -37,7 +37,7 @@ async def create_apartment(db: AsyncSession, apartment: ApartmentCreate, media: 
             await db.commit()
             await db.refresh(db_apartment)
 
-            urls = save_upload_file(media, db_apartment.id)
+            urls = save_upload_file(media, db_apartment.id, 'apartment')
             for url in urls:
                 db_apartment_media = ApartmentMedia(id=db_apartment.id, url=url['url'], media_type=url['media_type'])
                 db.add(db_apartment_media)
