@@ -21,7 +21,7 @@ router = APIRouter()
 async def login(
         request: Request,
         form_data: Annotated[CustomOAuth2PasswordRequestForm, Depends()],
-        db: AsyncSession = Depends(get_async_session),
+        db: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> Token:
     print(parse(request.headers.get("user-agent")))
     user = await authenticate_user(db, form_data.phone, form_data.password)
@@ -55,7 +55,7 @@ router_user = APIRouter()
 async def register_user(
         user: UserCreate,
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: AsyncSession = Depends(get_async_session),
+        db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     try:
         if not current_user.is_superuser:
@@ -69,7 +69,7 @@ async def register_user(
 @router_user.get("/")
 async def get_users_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: AsyncSession = Depends(get_async_session),
+        db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     try:
         if not current_user.is_superuser:
@@ -84,7 +84,7 @@ async def get_users_endpoint(
 async def get_user_by_id_endpoint(
         user_id: int,
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: AsyncSession = Depends(get_async_session),
+        db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     try:
         if not current_user.is_superuser:
@@ -100,7 +100,7 @@ async def update_user_endpoint(
         user_id: int,
         user: UserUpdate,
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: AsyncSession = Depends(get_async_session),
+        db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     try:
         if not current_user.is_superuser:
@@ -115,7 +115,7 @@ async def update_user_endpoint(
 async def delete_user_endpoint(
         user_id: int,
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: AsyncSession = Depends(get_async_session),
+        db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     try:
         if not current_user.is_superuser:
@@ -136,7 +136,7 @@ async def read_users_me(
 @router.get("/login_info/")
 async def get_login_info_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: AsyncSession = Depends(get_async_session)
+        db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
     if not current_user.is_superuser:
         raise HTTPException(
