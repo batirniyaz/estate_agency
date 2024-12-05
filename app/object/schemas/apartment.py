@@ -1,4 +1,3 @@
-from fastapi import UploadFile, File
 from pydantic import BaseModel, Field
 import datetime
 from typing import List, Optional
