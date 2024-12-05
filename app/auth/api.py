@@ -2,7 +2,6 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schema import Token, UserRead, UserCreate, UserUpdate
@@ -13,8 +12,9 @@ from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
 from user_agents import parse
 
+from .utils import oauth2_scheme
+
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post("/login")
