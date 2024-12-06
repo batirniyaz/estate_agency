@@ -14,7 +14,7 @@ from app.object.models.land import Land, LandMedia
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.models.commercial import Commercial, CommercialMedia
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition, LocationCommercial, \
-    LocationLand
+    LocationLand, CurrentStatus
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
