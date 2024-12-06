@@ -14,7 +14,7 @@ MEDIA_DIR = BASE_DIR / "storage"
 
 def save_upload_file(upload_file: [UploadFile], object_id, category) -> [dict]:
     urls = []
-    counter = 0
+    counter = 1
     for file in upload_file:
         media_type = "image" if file.content_type.startswith("image") else "video"
         if " " in file.filename:
