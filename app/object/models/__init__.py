@@ -51,3 +51,9 @@ class LocationLand(Enum):
     CLOSED_AREA = 'closed_area'
 
 
+class CurrentStatus(Enum):
+    FREE = 'free'
+    SOON = 'soon'
+    BUSY = 'busy'
+
+
