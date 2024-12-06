@@ -48,7 +48,6 @@ class Commercial(Base):
     rooms: Mapped[int] = mapped_column(Integer)
     square_area: Mapped[int] = mapped_column(Integer)
     floor_number: Mapped[int] = mapped_column(Integer)
-    floor: Mapped[int] = mapped_column(Integer)
     location: Mapped[LocationCommercial] = mapped_column(Enum(LocationCommercial))
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
