@@ -5,7 +5,7 @@ from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey
 
 from app.database import Base
 
-from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition
+from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition, CurrentStatus
 
 
 class ApartmentMedia(Base):
@@ -54,6 +54,7 @@ class Apartment(Base):
     bathroom: Mapped[BathroomType] = mapped_column(Enum(BathroomType))
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
+    current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus))
 
     # Contact information
     name: Mapped[str] = mapped_column(String(length=255))

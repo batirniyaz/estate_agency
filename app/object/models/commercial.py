@@ -5,7 +5,7 @@ from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey
 
 from app.database import Base
 
-from app.object.models import Category, ActionType, LocationCommercial, HouseCondition
+from app.object.models import Category, ActionType, LocationCommercial, HouseCondition, CurrentStatus
 
 
 class CommercialMedia(Base):
@@ -52,6 +52,7 @@ class Commercial(Base):
     location: Mapped[LocationCommercial] = mapped_column(Enum(LocationCommercial))
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
+    current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus))
     parking_place: Mapped[bool] = mapped_column(Boolean)
 
     # Agent
