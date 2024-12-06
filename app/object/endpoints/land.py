@@ -45,10 +45,12 @@ async def get_land_endpoint(current_user: Annotated[UserRead, Depends(get_curren
 async def update_land_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                db: Annotated[AsyncSession, Depends(get_async_session)],
                                land_id: int, land: LandUpdate = Query(...),):
-    return await update_land(db, land_id, land)
+    return await update_land(db, land_id, land, current_user.full_name)
 
 
 @router.delete("/{land_id}")
 async def delete_land_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                land_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
     return await delete_land(db, land_id)
