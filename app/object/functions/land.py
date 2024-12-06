@@ -78,6 +78,8 @@ async def update_land(db: AsyncSession, land_id: int, land: LandUpdate, agent_na
 
         land_validation = await validate_land(db, land)
         if land_validation:
+            land.agent_commission = land.agent_percent * land.price / 100
+
             for key, value in land.model_dump().items():
                 setattr(db_land, key, value)
 
