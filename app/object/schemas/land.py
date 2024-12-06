@@ -53,7 +53,7 @@ class LandBase(BaseModel):
                                           examples=['FREE', 'BUSY', 'SOON'])
     parking_place: bool = Field(..., description="The parking place status of the land", examples=[True, False])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the land", examples=[10])
-    agent_commission: Optional[int] = Field(None, description="The agent commission of the land", examples=[100])
+    agent_commission: Optional[float] = Field(None, description="The agent commission of the land", examples=[100])
 
 
 class LandCreate(LandBase):

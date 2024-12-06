@@ -62,7 +62,7 @@ class ApartmentBase(BaseModel):
     phone_number: str = Field(..., min_length=3, max_length=13, description="The phone number of the contact person",
                               examples=["+998901234567"])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the apartment", examples=[10])
-    agent_commission: Optional[int] = Field(None, description="The agent commission of the apartment", examples=[100])
+    agent_commission: Optional[float] = Field(None, description="The agent commission of the apartment", examples=[100])
 
 
 class ApartmentCreate(ApartmentBase):
@@ -112,7 +112,7 @@ class ApartmentResponse(ApartmentBase):
     media: Optional[List[ApartmentMediaResponse]] = Field(None, description="The images of the apartment")
     responsible: Optional[str] = Field(None, min_length=3, max_length=100,
                                        description="The name of the responsible person", examples=["John Doe"])
-    agent_commission: Optional[int] = Field(None, description="The agent commission of the apartment", examples=[100])
+    agent_commission: Optional[float] = Field(None, description="The agent commission of the apartment", examples=[100])
     created_at: datetime.datetime = Field(..., description="The created date of the apartment",
                                           examples=["2022-01-01T00:00:00"])
     updated_at: datetime.datetime = Field(..., description="The updated date of the apartment",
