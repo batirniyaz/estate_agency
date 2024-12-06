@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 import datetime
 from typing import List, Optional
 
-from app.object.models import Category, ActionType, LocationLand, HouseCondition
+from app.object.models import Category, ActionType, LocationLand, HouseCondition, CurrentStatus
 
 
 class LandMediaResponse(BaseModel):
@@ -49,6 +49,8 @@ class LandBase(BaseModel):
     furnished: bool = Field(True, description="The furnished status of the land", examples=[True, False])
     house_condition: HouseCondition = Field(..., description="The house condition of the land",
                                             examples=["EURO", "NORMAL", "REPAIR"])
+    current_status: CurrentStatus = Field(None, description='The current status of the apartment',
+                                          examples=['FREE', 'BUSY', 'SOON'])
     parking_place: bool = Field(..., description="The parking place status of the land", examples=[True, False])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the land", examples=[10])
     agent_commission: Optional[int] = Field(None, description="The agent commission of the land", examples=[100])
@@ -80,6 +82,8 @@ class LandUpdate(LandBase):
     furnished: Optional[bool] = Field(None, description="The furnished status of the land", examples=[True, False])
     house_condition: Optional[HouseCondition] = Field(None, description="The house condition of the land",
                                                       examples=["EURO", "NORMAL", "REPAIR"])
+    current_status: Optional[CurrentStatus] = Field(None, description='The current status of the apartment',
+                                                    examples=['FREE', 'BUSY', 'SOON'])
     parking_place: Optional[bool] = Field(None, description="The parking place status of the land", examples=[True, False])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the land", examples=[10])
 
@@ -114,6 +118,7 @@ class LandResponse(LandBase):
                 "location": "CITY",
                 "furnished": True,
                 "house_condition": "EURO",
+                'current_status': 'FREE',
                 "parking_place": True,
                 "name": "John Doe",
                 "phone_number": "+998901234567",

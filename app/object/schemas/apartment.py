@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 import datetime
 from typing import List, Optional
 
-from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition
+from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition, CurrentStatus
 
 
 class ApartmentMediaResponse(BaseModel):
@@ -55,6 +55,8 @@ class ApartmentBase(BaseModel):
     furnished: bool = Field(True, description="The furnished status of the apartment", examples=[True, False])
     house_condition: HouseCondition = Field(..., description="The house condition of the apartment",
                                             examples=["EURO", "NORMAL", "REPAIR"])
+    current_status: CurrentStatus = Field(..., description='The current status of the apartment',
+                                          examples=['FREE', 'BUSY', 'SOON'])
     name: str = Field(..., min_length=3, max_length=100, description="The name of the contact person",
                       examples=["John Doe"])
     phone_number: str = Field(..., min_length=3, max_length=13, description="The phone number of the contact person",
@@ -94,6 +96,8 @@ class ApartmentUpdate(ApartmentBase):
     furnished: Optional[bool] = Field(None, description="The furnished status of the apartment", examples=[True, False])
     house_condition: Optional[HouseCondition] = Field(None, description="The house condition of the apartment",
                                                       examples=["EURO", "NORMAL", "REPAIR"])
+    current_status: Optional[CurrentStatus] = Field(None, description='The current status of the apartment',
+                                                    examples=['FREE', 'BUSY', 'SOON'])
     name: Optional[str] = Field(None, min_length=3, max_length=100, description="The name of the contact person",
                                 examples=["John Doe"])
     phone_number: Optional[str] = Field(None, min_length=3, max_length=13,
