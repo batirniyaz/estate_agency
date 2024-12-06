@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey
+from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey, Float
 
 from app.database import Base
 
@@ -63,7 +63,7 @@ class Apartment(Base):
     # Agent
     responsible: Mapped[str] = mapped_column(String)
     agent_percent: Mapped[int] = mapped_column(Integer, nullable=True)
-    agent_commission: Mapped[int] = mapped_column(Integer, nullable=True)
+    agent_commission: Mapped[float] = mapped_column(Float, nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
