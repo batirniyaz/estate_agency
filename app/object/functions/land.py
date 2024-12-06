@@ -101,6 +101,11 @@ async def update_land(db: AsyncSession, land_id: int, land: LandUpdate):
 async def delete_land(db: AsyncSession, land_id: int):
     try:
         db_land = await get_land(db, land_id)
+        for media in db_land.media:
+            file_path = os.path.join("app/storage", "land", os.path.basename(media.url))
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            await db.delete(media)
 
         await db.delete(db_land)
         await db.commit()

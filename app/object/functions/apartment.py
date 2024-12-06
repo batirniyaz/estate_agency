@@ -99,7 +99,7 @@ async def update_apartment(db: AsyncSession, apartment_id: int, apartment: Apart
 async def delete_apartment(db: AsyncSession, apartment_id: int):
     db_apartment = await get_apartment(db, apartment_id)
     for media in db_apartment.media:
-        file_path = os.path.join("app/storage", "images" if media.media_type == 'image' else 'videos', os.path.basename(media.url))
+        file_path = os.path.join("app/storage", "apartment", os.path.basename(media.url))
         if os.path.exists(file_path):
             os.remove(file_path)
         await db.delete(media)
