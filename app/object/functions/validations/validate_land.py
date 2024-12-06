@@ -24,6 +24,8 @@ async def validate_land(db, land):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object live_square_area must be greater than 0")
     elif not land.live_square_area.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object live_square_area must be integer")
+    elif land.live_square_area > land.square_area:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object live_square_area must be less than square_area")
 
     if land.floor_number <= 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object floor_number must be greater than 0")
