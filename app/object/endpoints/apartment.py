@@ -14,9 +14,9 @@ router = APIRouter()
 
 @router.post("/")
 async def create_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
-                               db: Annotated[AsyncSession, Depends(get_async_session)],
-                               apartment: ApartmentCreate = Query(...),
-                               media: List[UploadFile] = File(...)):
+                                    db: Annotated[AsyncSession, Depends(get_async_session)],
+                                    apartment: ApartmentCreate = Query(...),
+                                    media: List[UploadFile] = File(...)):
     try:
         return await create_apartment(db, apartment, media, current_user)
     except HTTPException as e:
@@ -44,12 +44,14 @@ async def get_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_c
 async def update_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                     db: Annotated[AsyncSession, Depends(get_async_session)],
                                     apartment_id: int, apartment: ApartmentUpdate = Query(...),):
-    return await update_apartment(db, apartment_id, apartment)
+    return await update_apartment(db, apartment_id, apartment, current_user.full_name)
 
 
 @router.delete("/{apartment_id}")
 async def delete_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                     apartment_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
+    if not current_user.is_superuser:
+        HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
     return await delete_apartment(db, apartment_id)
 
 
