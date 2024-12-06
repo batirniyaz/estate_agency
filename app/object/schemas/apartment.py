@@ -38,7 +38,7 @@ class ApartmentBase(BaseModel):
     title: str = Field(..., min_length=3, max_length=50, description="The title of the apartment",
                        examples=["Apartment for sale"])
     category: Category = Field(..., description="The category of the apartment",
-                               examples=["LAND", "APARTMENT", "COMMERCIAL"])
+                               examples=["APARTMENT", "LAND", "COMMERCIAL"])
     action_type: ActionType = Field(..., description="The action type of the apartment",
                                     examples=["SALE", "RENT"])
     description: Optional[str] = Field(None, max_length=6000, description="The description of the apartment", examples=["Apartment for sale"])
