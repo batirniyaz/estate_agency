@@ -54,7 +54,7 @@ class Apartment(Base):
     bathroom: Mapped[BathroomType] = mapped_column(Enum(BathroomType))
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
-    current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus))
+    current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus), nullable=True)
 
     # Contact information
     name: Mapped[str] = mapped_column(String(length=255))

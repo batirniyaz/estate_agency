@@ -52,7 +52,7 @@ class Land(Base):
     location: Mapped[LocationLand] = mapped_column(Enum(LocationLand))
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
-    current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus))
+    current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus), nullable=True)
     parking_place: Mapped[bool] = mapped_column(Boolean)
 
     # Agent
