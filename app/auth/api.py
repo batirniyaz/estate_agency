@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.schema import Token, UserRead, UserCreate, UserUpdate
 from app.auth.utils import CustomOAuth2PasswordRequestForm, authenticate_user, create_access_token, \
     get_current_active_user, create_user, blacklist_token, log_login_info, get_login_info, get_users, get_user_by_id, \
-    update_user, delete_user
+    update_user, delete_user, read_me
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
 from user_agents import parse
@@ -126,11 +126,12 @@ async def delete_user_endpoint(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router.get("/me/", response_model=UserRead)
-async def read_users_me(
+@router.get("/me/", response_model={})
+async def read_user_me(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
+        token: Annotated[str, Depends(oauth2_scheme)]
 ):
-    return current_user
+    return await read_me(current_user, token)
 
 
 @router.get("/login_info/")
