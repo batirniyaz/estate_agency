@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.model import User, LoginInfo
 from app.auth.schema import TokenData, UserRead, UserCreate, UserResponse, UserUpdate
-from app.config import SECRET, ALGORITHM
+from app.config import SECRET, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -182,6 +182,16 @@ async def delete_user(db: AsyncSession, user_id: int):
     await db.delete(user)
     await db.commit()
     raise HTTPException(status_code=status.HTTP_200_OK, detail="User deleted")
+
+
+async def read_me(current_user, token: Annotated[str, Depends(oauth2_scheme)]):
+    payload = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
+    current_tz = pytz.timezone('Asia/Tashkent')
+    new_expire = datetime.now(current_tz) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    payload['exp'] = new_expire
+    new_token = jwt.encode(payload, SECRET, algorithm=ALGORITHM)
+
+    return {"user": current_user, "token": new_token}
 
 
 async def log_login_info(db: AsyncSession, user_id, email, phone):
