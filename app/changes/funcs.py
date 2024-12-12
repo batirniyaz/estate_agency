@@ -23,9 +23,9 @@ async def log_change(db: AsyncSession, table_name: str, operation: OperationType
         change_log = ChangeLog(
             table_name=table_name,
             operation=operation,
-            before_data=before_data,
-            after_data=after_data,
-            user_id=user_id,
+            before_data=serialize(before_data),
+            after_data=serialize(after_data),
+            user=user,
         )
         db.add(change_log)
         await db.commit()
