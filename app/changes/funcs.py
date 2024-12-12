@@ -48,9 +48,22 @@ async def process_log_queue():
 
 
 def register_event_listener(model: Type):
-    @listens_for(model, 'before_update')
-    def capture_before_update(mapper, connection, target):
-        target._before_update = {column.key: getattr(target, column.key) for column in mapper.columns}
+
+    @listens_for(Session, 'before_flush')
+    def capture_before_flush(session, flush_context, instances):
+        for instance in session.dirty:
+            if isinstance(instance, model):
+                original_values = {}
+                for column in instance.__table__.columns:
+                    try:
+                        history = get_history(instance, column.key)
+                        if history.has_changes():
+                            original_values[column.key] = history.deleted[0] if history.deleted else None
+                    except Exception as e:
+                        print(f"Error capturing original value for {column.key}: {e}")
+
+                if original_values:
+                    setattr(instance, '_original_values', original_values)
 
     @listens_for(model, 'after_update')
     def receive_after_update(mapper, connection, target):
