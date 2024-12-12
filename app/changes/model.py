@@ -1,14 +1,10 @@
 import datetime
 
-from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import Integer, String, TIMESTAMP, ForeignKey, Enum, JSON
+from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy import Integer, String, TIMESTAMP, Enum, JSON
 from enum import Enum as enum
-from typing import TYPE_CHECKING
 
 from app.database import Base
-
-if TYPE_CHECKING:
-    from app.auth.model import User
 
 
 class OperationType(enum):
@@ -25,8 +21,7 @@ class ChangeLog(Base):
     operation: Mapped[OperationType] = mapped_column(Enum(OperationType), nullable=False)
     before_data: Mapped[dict] = mapped_column(JSON, default={}, nullable=True)
     after_data: Mapped[dict] = mapped_column(JSON, default={}, nullable=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'), nullable=True)
-    user: Mapped['User'] = relationship(back_populates='change_logs', lazy='selectin')
+    user: Mapped[str] = mapped_column(String, nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
