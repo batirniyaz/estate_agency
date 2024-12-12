@@ -36,14 +36,15 @@ async def log_change(db: AsyncSession, table_name: str, operation: OperationType
 
 
 async def process_log_queue():
-    while True:
-        db_session, table_name, operation, user_id, before_data, after_data = await log_queue.get()
-        try:
-            await log_change(db_session, table_name, operation, user_id, before_data, after_data)
-        except Exception as e:
-            print(f"Failed to log change for {table_name}, operation {operation}, user {user_id}: {e}")
-        finally:
-            log_queue.task_done()
+    async for db_session in get_async_session():
+        while True:
+            table_name, operation, user, before_data, after_data = await log_queue.get()
+            try:
+                await log_change(db_session, table_name, operation, user, before_data, after_data)
+            except Exception as e:
+                print(f"Failed to log change: {e}")
+            finally:
+                log_queue.task_done()
 
 
 def register_event_listener(model: Type):
