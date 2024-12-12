@@ -7,7 +7,13 @@ from app.changes.model import ChangeLog, OperationType
 log_queue = asyncio.Queue()
 
 
-async def log_change(db: AsyncSession, table_name: str, operation: OperationType, user_id: int, before_data: dict, after_data: dict):
+def serialize(data):
+    if data is None:
+        return None
+    return {key: (value.isoformat() if isinstance(value, datetime) else value.value if isinstance(value, Enum) else value) for key, value in data.items()}
+
+
+async def log_change(db: AsyncSession, table_name: str, operation: OperationType, user: str, before_data: dict, after_data: dict):
     try:
         change_log = ChangeLog(
             table_name=table_name,
