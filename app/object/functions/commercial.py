@@ -73,7 +73,13 @@ async def get_commercial(db: AsyncSession, commercial_id: int):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-async def update_commercial(db: AsyncSession, commercial_id: int, commercial: CommercialUpdate, agent_name):
+async def update_commercial(
+        db: AsyncSession,
+        commercial_id: int,
+        commercial: CommercialUpdate,
+        agent_name,
+        media: Optional[List[UploadFile]] = None
+):
     try:
         db_commercial = await get_commercial(db, commercial_id)
         if agent_name != db_commercial.responsible:
@@ -82,6 +88,18 @@ async def update_commercial(db: AsyncSession, commercial_id: int, commercial: Co
         commercial_validation = await validate_commercial(db, commercial)
         if commercial_validation:
             commercial.agent_commission = commercial.agent_percent * commercial.price / 100
+
+            if media:
+                await validate_media(media)
+
+                last_media = db_commercial.media[-1].url if db_commercial.media else None
+                name, ext = last_media.split('.')
+
+                urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1])
+                for url in urls:
+                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                    db.add(db_commercial_media)
+                    db_commercial.media.append(db_commercial_media)
 
             for key, value in commercial.model_dump(exclude_unset=True).items():
                 setattr(db_commercial, key, value)

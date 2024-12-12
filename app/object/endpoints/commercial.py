@@ -47,8 +47,11 @@ async def get_commercial_endpoint(current_user: Annotated[UserRead, Depends(get_
 @router.put("/{commercial_id}")
 async def update_commercial_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                      db: Annotated[AsyncSession, Depends(get_async_session)],
-                                     commercial_id: int, commercial: CommercialUpdate = Query(...),):
-    return await update_commercial(db, commercial_id, commercial, current_user.full_name)
+                                     commercial_id: int, commercial: CommercialUpdate = Query(...),
+                                     media: Optional[List[UploadFile]] = File(None)):
+    return await update_commercial(
+        db=db, commercial_id=commercial_id, commercial=commercial,
+        agent_name=current_user.full_name, media=media if media else None)
 
 
 @router.delete("/{commercial_id}")

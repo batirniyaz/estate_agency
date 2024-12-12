@@ -44,8 +44,10 @@ async def get_land_endpoint(current_user: Annotated[UserRead, Depends(get_curren
 @router.put("/{land_id}")
 async def update_land_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                db: Annotated[AsyncSession, Depends(get_async_session)],
-                               land_id: int, land: LandUpdate = Query(...),):
-    return await update_land(db, land_id, land, current_user.full_name)
+                               land_id: int, land: LandUpdate = Query(...),
+                               media: Optional[List[UploadFile]] = File(None)):
+    return await update_land(db=db, land_id=land_id, land=land, agent_name=current_user.full_name,
+                             media=media if media else None)
 
 
 @router.delete("/{land_id}")

@@ -76,7 +76,13 @@ async def get_land(db: AsyncSession, land_id: int):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-async def update_land(db: AsyncSession, land_id: int, land: LandUpdate, agent_name):
+async def update_land(
+        db: AsyncSession,
+        land_id: int,
+        land: LandUpdate,
+        agent_name,
+        media: Optional[List[UploadFile]] = None
+):
     try:
         db_land = await get_land(db, land_id)
         if agent_name != db_land.responsible:
@@ -85,6 +91,18 @@ async def update_land(db: AsyncSession, land_id: int, land: LandUpdate, agent_na
         land_validation = await validate_land(db, land)
         if land_validation:
             land.agent_commission = land.agent_percent * land.price / 100
+
+            if media:
+                await validate_media(media)
+
+                last_media = db_land.media[-1].url if db_land.media else None
+                name, ext = last_media.split('.')
+
+                urls = save_upload_file(media, db_land.id, 'land', name[-1])
+                for url in urls:
+                    db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
+                    db.add(db_land_media)
+                    db_land.media.append(db_land_media)
 
             for key, value in land.model_dump().items():
                 setattr(db_land, key, value)

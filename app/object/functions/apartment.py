@@ -72,7 +72,13 @@ async def get_apartment(db: AsyncSession, apartment_id: int):
     pass
 
 
-async def update_apartment(db: AsyncSession, apartment_id: int, apartment: ApartmentUpdate, agent_name: str):
+async def update_apartment(
+        db: AsyncSession,
+        apartment_id: int,
+        apartment: ApartmentUpdate,
+        agent_name: str,
+        media: Optional[List[UploadFile]] = None
+):
     db_apartment = await get_apartment(db, apartment_id)
     if agent_name != db_apartment.responsible:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
@@ -82,6 +88,19 @@ async def update_apartment(db: AsyncSession, apartment_id: int, apartment: Apart
         apartment_validation = await validate_apartment(db, apartment)
         if apartment_validation:
             apartment.agent_commission = apartment.agent_percent * apartment.price / 100
+
+            if media:
+                await validate_media(media)
+
+                last_media = db_apartment.media[-1].url if db_apartment.media else None
+                name, ext = last_media.split('.')
+
+                urls = save_upload_file(media, db_apartment.id, 'apartment', name[-1])
+                for url in urls:
+                    db_apartment_media = ApartmentMedia(apartment_id=db_apartment.id, url=url['url'],
+                                                        media_type=url['media_type'])
+                    db.add(db_apartment_media)
+                    db_apartment.media.append(db_apartment_media)
 
             for key, value in apartment.model_dump(exclude_unset=True).items():
                 setattr(db_apartment, key, value)
