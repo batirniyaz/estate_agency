@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import UploadFile
 from pathlib import Path
 
@@ -12,9 +14,10 @@ if not (BASE_DIR / "storage").exists():
 MEDIA_DIR = BASE_DIR / "storage"
 
 
-def save_upload_file(upload_file: [UploadFile], object_id, category) -> [dict]:
+def save_upload_file(upload_file: [UploadFile], object_id, category,
+                     last_media: Optional[int] = None) -> [dict]:
     urls = []
-    counter = 1
+    counter = int(last_media)+1 if last_media else 1
     for file in upload_file:
         media_type = "image" if file.content_type.startswith("image") else "video"
         if " " in file.filename:
