@@ -1,4 +1,5 @@
 import os
+from typing import Optional, List
 
 from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.object.functions import generate_crm_id
+from app.object.functions.validations.validate_media import validate_media
 from app.object.models.land import LandMedia, Land
 from app.object.schemas.land import LandCreate, LandResponse, LandUpdate
 from app.utils.file_utils import save_upload_file
@@ -14,7 +16,8 @@ from app.utils.file_utils import save_upload_file
 from app.object.functions.validations.validate_land import validate_land
 
 
-async def create_land(db: AsyncSession, land: LandCreate, media: [UploadFile], current_user):
+async def create_land(
+        current_user, db: AsyncSession, land: LandCreate, media: Optional[List[UploadFile]] = None):
     try:
         land_validation = await validate_land(db, land)
 
@@ -27,11 +30,14 @@ async def create_land(db: AsyncSession, land: LandCreate, media: [UploadFile], c
             await db.commit()
             await db.refresh(db_land)
 
-            urls = save_upload_file(media, db_land.id, 'land')
-            for url in urls:
-                db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
-                db.add(db_land_media)
-                db_land.media.append(db_land_media)
+            if media:
+                await validate_media(media)
+
+                urls = save_upload_file(media, db_land.id, 'land')
+                for url in urls:
+                    db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
+                    db.add(db_land_media)
+                    db_land.media.append(db_land_media)
 
             await db.commit()
             await db.refresh(db_land)

@@ -1,4 +1,5 @@
 import os
+from typing import Optional, List
 
 from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.object.functions import generate_crm_id
+from app.object.functions.validations.validate_media import validate_media
 from app.object.models.commercial import CommercialMedia, Commercial
 from app.object.schemas.commercial import CommercialCreate, CommercialResponse, CommercialUpdate
 from app.utils.file_utils import save_upload_file
@@ -14,7 +16,8 @@ from app.utils.file_utils import save_upload_file
 from app.object.functions.validations.validate_commercial import validate_commercial
 
 
-async def create_commercial(db: AsyncSession, commercial: CommercialCreate, media: [UploadFile], current_user):
+async def create_commercial(
+        current_user, db: AsyncSession, commercial: CommercialCreate, media: Optional[List[UploadFile]] = None):
     try:
         commercial_validation = await validate_commercial(db, commercial)
 
@@ -27,11 +30,14 @@ async def create_commercial(db: AsyncSession, commercial: CommercialCreate, medi
             await db.commit()
             await db.refresh(db_commercial)
 
-            urls = save_upload_file(media, db_commercial.id, 'commercial')
-            for url in urls:
-                db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
-                db.add(db_commercial_media)
-                db_commercial.media.append(db_commercial_media)
+            if media:
+                await validate_media(media)
+
+                urls = save_upload_file(media, db_commercial.id, 'commercial')
+                for url in urls:
+                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                    db.add(db_commercial_media)
+                    db_commercial.media.append(db_commercial_media)
 
             await db.commit()
             await db.refresh(db_commercial)
