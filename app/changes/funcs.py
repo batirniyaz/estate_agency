@@ -66,9 +66,13 @@ def register_event_listener(model: Type):
         db_session = AsyncSession.object_session(target)
         if db_session:
             asyncio.create_task(
-                log_queue.put((db_session, model.__tablename__, OperationType.CREATE, target.created_by_id,
-                               None,
-                               {column.key: getattr(target, column.key) for column in mapper.columns}))
+                log_queue.put((
+                    target.__tablename__,
+                    OperationType.CREATE,
+                    target.responsible,
+                    None,
+                    {column.key: getattr(target, column.key) for column in mapper.columns},
+                ))
             )
 
     @listens_for(model, 'after_delete')
