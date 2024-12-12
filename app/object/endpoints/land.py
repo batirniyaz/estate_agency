@@ -1,4 +1,4 @@
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,9 +17,9 @@ router = APIRouter()
 async def create_land_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                db: Annotated[AsyncSession, Depends(get_async_session)],
                                land: LandCreate = Query(...),
-                               media: List[UploadFile] = File(...)):
+                               media: Optional[List[UploadFile]] = File(None)):
     try:
-        return await create_land(db, land, media, current_user)
+        return await create_land(db=db, land=land, media=media if media else None, current_user=current_user)
     except HTTPException as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

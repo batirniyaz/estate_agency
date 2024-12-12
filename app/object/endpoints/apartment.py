@@ -1,4 +1,4 @@
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,9 +16,10 @@ router = APIRouter()
 async def create_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                     db: Annotated[AsyncSession, Depends(get_async_session)],
                                     apartment: ApartmentCreate = Query(...),
-                                    media: List[UploadFile] = File(...)):
+                                    media: Optional[List[UploadFile]] = File(None)):
     try:
-        return await create_apartment(db, apartment, media, current_user)
+        return await create_apartment(
+            db=db, apartment=apartment, media=media if media else None, current_user=current_user)
     except HTTPException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
