@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.auth.superuser import create_superuser
 from app.changes.funcs import process_log_queue
+from app.changes.track_models import register_event_listeners
 from app.database import create_db_and_tables
 from app import router
 
@@ -16,6 +17,7 @@ async def lifespan(main_app: FastAPI):
     await create_db_and_tables()
     await create_superuser()
 
+    register_event_listeners()
     log_queue_task = asyncio.create_task(process_log_queue())
 
     try:
