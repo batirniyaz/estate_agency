@@ -2,6 +2,9 @@ import asyncio
 from enum import Enum
 from typing import Type
 from datetime import datetime
+
+from fastapi import HTTPException, status
+from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.event import listens_for
 from app.changes.model import ChangeLog, OperationType
@@ -114,3 +117,13 @@ def register_event_listener(model: Type):
                                {column.key: getattr(target, column.key) for column in mapper.columns},
                                None))
             )
+
+
+async def get_changes_log(db, limit: int = 10, page: int = 1):
+    try:
+        result = await db.execute(select(ChangeLog).limit(limit).offset((page - 1) * limit))
+        changes = result.scalars().all()
+
+        return changes if changes else []
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
