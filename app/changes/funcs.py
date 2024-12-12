@@ -69,11 +69,27 @@ def register_event_listener(model: Type):
     def receive_after_update(mapper, connection, target):
         db_session = AsyncSession.object_session(target)
         if db_session:
-            asyncio.create_task(
-                log_queue.put((db_session, model.__tablename__, OperationType.UPDATE, target.created_by_id,
-                               getattr(target, '_before_update', {}),
-                               {column.key: getattr(target, column.key) for column in mapper.columns}))
-            )
+
+            before_data = getattr(target, '_original_values', {})
+
+            changed_attrs = [attr for attr in mapper.columns if get_history(target, attr.key).has_changes()]
+            after_data = {
+                attr.key: getattr(target, attr.key)
+                for attr in changed_attrs
+                if attr.key != 'updated_at'
+            }
+
+            if after_data:
+
+                loop = asyncio.get_event_loop()
+                asyncio.run_coroutine_threadsafe(
+                    log_queue.put((target.__tablename__, OperationType.UPDATE, target.responsible,
+                                   before_data, after_data)),
+                    loop
+                )
+
+            if hasattr(target, '_original_values'):
+                delattr(target, '_original_values')
 
     @listens_for(model, 'after_insert')
     def receive_after_insert(mapper, connection, target):
