@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.auth.superuser import create_superuser
-from app.bot.instance import bot
 from app.changes.funcs import process_log_queue
 from app.changes.track_models import register_event_listeners
 from app.database import create_db_and_tables
