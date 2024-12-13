@@ -57,7 +57,7 @@ async def update_metro(db: AsyncSession, metro_id: int, metro: MetroUpdate):
         return db_metro
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 async def delete_metro(db: AsyncSession, metro_id: int):

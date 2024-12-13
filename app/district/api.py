@@ -18,15 +18,10 @@ async def create_district_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: AsyncSession = Depends(get_async_session),
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create districts")
-        return await create_district(db, district)
-    except Exception as e:
+    if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create districts")
+    return await create_district(db, district)
 
 
 @router.get("/", response_model=list[DistrictResponse])
@@ -53,15 +48,10 @@ async def update_district_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: AsyncSession = Depends(get_async_session)
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update districts")
-        return await update_district(db, district_id, district)
-    except Exception as e:
+    if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update districts")
+    return await update_district(db, district_id, district)
 
 
 @router.delete("/{district_id}")
@@ -70,12 +60,7 @@ async def delete_district_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: AsyncSession = Depends(get_async_session)
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete districts")
-        return await delete_district(db, district_id)
-    except Exception as e:
+    if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete districts")
+    return await delete_district(db, district_id)
