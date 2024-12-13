@@ -18,29 +18,38 @@ async def validate_apartment(db, apartment):
 
     if apartment.price <= 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object price must be greater than 0")
-    elif not apartment.price.is_integer():
+
+    if not apartment.price.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object price must be integer")
 
-    if 0 >= apartment.rooms > 30:
+    if apartment.rooms < 0 or apartment.rooms > 30:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object room must be greater or equal than 0 and less than 30")
-    elif not apartment.rooms.is_integer():
+
+    if not apartment.rooms.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object room must be integer")
 
     if not apartment.floor.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object floor must be integer")
-    elif apartment.floor > apartment.floor_number:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object floor must be less than floor_number")
+
+    if apartment.floor > apartment.floor_number or apartment.floor < -2:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object floor must be less than floor_number or greater than -3")
+
+    if apartment.floor_number <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object floor_number must be greater than 0")
 
     if len(apartment.phone_number) != 13:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object phone must be 13 characters")
-    elif not apartment.phone_number[1:].isdigit():
+
+    if not apartment.phone_number[1:].isdigit():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object phone must be integer")
-    elif not apartment.phone_number[0] == "+":
+
+    if not apartment.phone_number[0] == "+":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object phone must start with +")
 
     if 0 >= apartment.agent_percent > 100:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be greater than 0")
-    elif not apartment.agent_percent.is_integer():
+
+    if not apartment.agent_percent.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be integer")
 
     return True
