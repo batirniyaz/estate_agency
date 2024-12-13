@@ -19,38 +19,36 @@ from app.object.functions.validations.validate_land import validate_land
 async def create_land(
         current_user, db: AsyncSession, land: LandCreate, media: Optional[List[UploadFile]] = None):
     try:
-        land_validation = await validate_land(db, land)
+        await validate_land(db, land)
 
-        if land_validation:
-            land.crm_id = await generate_crm_id(db, Land, 'L')
-            land.responsible = current_user.full_name
-            land.agent_commission = land.agent_percent * land.price / 100
-            db_land = Land(**land.model_dump())
-            db.add(db_land)
-            await db.commit()
-            await db.refresh(db_land)
+        land.crm_id = await generate_crm_id(db, Land, 'L')
+        land.responsible = current_user.full_name
+        land.agent_commission = land.agent_percent * land.price / 100
+        db_land = Land(**land.model_dump())
+        db.add(db_land)
+        await db.commit()
+        await db.refresh(db_land)
 
-            if media:
-                await validate_media(media)
+        if media:
+            await validate_media(media)
 
-                urls = save_upload_file(media, db_land.id, 'land')
-                for url in urls:
-                    db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
-                    db.add(db_land_media)
-                    db_land.media.append(db_land_media)
+            urls = save_upload_file(media, db_land.id, 'land')
+            for url in urls:
+                db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
+                db.add(db_land_media)
+                db_land.media.append(db_land_media)
 
-            await db.commit()
-            await db.refresh(db_land)
+        await db.commit()
+        await db.refresh(db_land)
 
-            land_response = LandResponse.model_validate(db_land)
-            return jsonable_encoder(land_response)
+        land_response = LandResponse.model_validate(db_land)
+        return jsonable_encoder(land_response)
+
     except IntegrityError as e:
         if 'duplicate key value violates unique constraint' in str(e):
             print(e)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Land already exists")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Land already exists")
+        raise
 
 
 async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
@@ -88,38 +86,42 @@ async def update_land(
         if agent_name != db_land.responsible:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
 
-        land_validation = await validate_land(db, land)
-        if land_validation:
-            land.agent_commission = land.agent_percent * land.price / 100
+        await validate_land(db, land)
+        land.agent_commission = land.agent_percent * land.price / 100
 
-            if media:
-                await validate_media(media)
+        if media:
+            await validate_media(media)
 
-                last_media = db_land.media[-1].url if db_land.media else None
-                name, ext = last_media.split('.')
+            last_media = db_land.media[-1].url if db_land.media else None
+            name, ext = last_media.split('.')
 
-                urls = save_upload_file(media, db_land.id, 'land', name[-1])
-                for url in urls:
-                    db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
-                    db.add(db_land_media)
-                    db_land.media.append(db_land_media)
+            urls = save_upload_file(media, db_land.id, 'land', name[-1])
+            for url in urls:
+                db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
+                db.add(db_land_media)
+                db_land.media.append(db_land_media)
 
-            for key, value in land.model_dump().items():
-                setattr(db_land, key, value)
+        for key, value in land.model_dump().items():
+            setattr(db_land, key, value)
 
-            db.add(db_land)
-            await db.commit()
-            await db.refresh(db_land)
+        db.add(db_land)
+        await db.commit()
+        await db.refresh(db_land)
 
-            land_response = LandResponse.model_validate(db_land)
-            return jsonable_encoder(land_response)
+        land_response = LandResponse.model_validate(db_land)
+        return jsonable_encoder(land_response)
+
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-async def delete_land(db: AsyncSession, land_id: int):
+async def delete_land(db: AsyncSession, land_id: int, agent_name):
     try:
         db_land = await get_land(db, land_id)
+
+        if agent_name != db_land.responsible:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
+
         for media in db_land.media:
             file_path = os.path.join("app/storage", "land", os.path.basename(media.url))
             if os.path.exists(file_path):
@@ -130,5 +132,5 @@ async def delete_land(db: AsyncSession, land_id: int):
         await db.commit()
         return {"detail": "Land deleted successfully"}
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

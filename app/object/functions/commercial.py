@@ -19,38 +19,38 @@ from app.object.functions.validations.validate_commercial import validate_commer
 async def create_commercial(
         current_user, db: AsyncSession, commercial: CommercialCreate, media: Optional[List[UploadFile]] = None):
     try:
-        commercial_validation = await validate_commercial(db, commercial)
+        await validate_commercial(db, commercial)
 
-        if commercial_validation:
-            commercial.crm_id = await generate_crm_id(db, Commercial, 'C')
-            commercial.responsible = current_user.full_name
-            commercial.agent_commission = commercial.agent_percent * commercial.price / 100
-            db_commercial = Commercial(**commercial.model_dump())
-            db.add(db_commercial)
-            await db.commit()
-            await db.refresh(db_commercial)
+        commercial.crm_id = await generate_crm_id(db, Commercial, 'C')
+        commercial.responsible = current_user.full_name
+        commercial.agent_commission = commercial.agent_percent * commercial.price / 100
+        db_commercial = Commercial(**commercial.model_dump())
+        db.add(db_commercial)
+        await db.commit()
+        await db.refresh(db_commercial)
 
-            if media:
-                await validate_media(media)
+        if media:
+            await validate_media(media)
 
-                urls = save_upload_file(media, db_commercial.id, 'commercial')
-                for url in urls:
-                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
-                    db.add(db_commercial_media)
-                    db_commercial.media.append(db_commercial_media)
+            urls = save_upload_file(media, db_commercial.id, 'commercial')
+            for url in urls:
+                db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                db.add(db_commercial_media)
+                db_commercial.media.append(db_commercial_media)
 
-            await db.commit()
-            await db.refresh(db_commercial)
+        await db.commit()
+        await db.refresh(db_commercial)
 
-            commercial_response = CommercialResponse.model_validate(db_commercial)
-            return jsonable_encoder(commercial_response)
+        commercial_response = CommercialResponse.model_validate(db_commercial)
+        return jsonable_encoder(commercial_response)
+
     except IntegrityError as e:
         if 'duplicate key value violates unique constraint' in str(e):
             print(e)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Commercial already exists")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):
@@ -85,24 +85,24 @@ async def update_commercial(
         if agent_name != db_commercial.responsible:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not allowed to update this commercial")
 
-        commercial_validation = await validate_commercial(db, commercial)
-        if commercial_validation:
-            commercial.agent_commission = commercial.agent_percent * commercial.price / 100
+        await validate_commercial(db, commercial)
 
-            if media:
-                await validate_media(media)
+        commercial.agent_commission = commercial.agent_percent * commercial.price / 100
 
-                last_media = db_commercial.media[-1].url if db_commercial.media else None
-                name, ext = last_media.split('.')
+        if media:
+            await validate_media(media)
 
-                urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1])
-                for url in urls:
-                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
-                    db.add(db_commercial_media)
-                    db_commercial.media.append(db_commercial_media)
+            last_media = db_commercial.media[-1].url if db_commercial.media else None
+            name, ext = last_media.split('.')
 
-            for key, value in commercial.model_dump(exclude_unset=True).items():
-                setattr(db_commercial, key, value)
+            urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1])
+            for url in urls:
+                db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                db.add(db_commercial_media)
+                db_commercial.media.append(db_commercial_media)
+
+        for key, value in commercial.model_dump(exclude_unset=True).items():
+            setattr(db_commercial, key, value)
 
         await db.commit()
         await db.refresh(db_commercial)
