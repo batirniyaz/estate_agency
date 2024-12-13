@@ -21,8 +21,8 @@ async def validate_apartment(db, apartment):
     elif not apartment.price.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object price must be integer")
 
-    if apartment.rooms <= 0 or apartment.rooms > 30:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object room must be greater than 0")
+    if 0 >= apartment.rooms > 30:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object room must be greater or equal than 0 and less than 30")
     elif not apartment.rooms.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object room must be integer")
 
