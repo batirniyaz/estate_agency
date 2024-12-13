@@ -6,10 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.auth.superuser import create_superuser
+from app.bot.instance import bot
 from app.changes.funcs import process_log_queue
 from app.changes.track_models import register_event_listeners
 from app.database import create_db_and_tables
 from app import router
+
+from app.bot.run_bot import run_bot
 
 
 @asynccontextmanager
@@ -20,12 +23,16 @@ async def lifespan(main_app: FastAPI):
     register_event_listeners()
     log_queue_task = asyncio.create_task(process_log_queue())
 
+    bot_task = asyncio.create_task(run_bot())
+
     try:
         yield
     finally:
+        bot_task.cancel()
         log_queue_task.cancel()
         try:
             await log_queue_task
+            await bot_task
         except asyncio.CancelledError:
             pass
 
