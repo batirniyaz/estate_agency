@@ -20,11 +20,8 @@ async def create_commercial_endpoint(current_user: Annotated[UserRead, Depends(g
                                      db: Annotated[AsyncSession, Depends(get_async_session)],
                                      commercial: CommercialCreate = Query(...),
                                      media: Optional[List[UploadFile]] = File(None)):
-    try:
-        return await create_commercial(
-            db=db, commercial=commercial, media=media if media else None, current_user=current_user)
-    except HTTPException as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return await create_commercial(
+        db=db, commercial=commercial, media=media if media else None, current_user=current_user)
 
 
 @router.get("/")

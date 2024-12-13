@@ -17,11 +17,8 @@ async def create_apartment_endpoint(current_user: Annotated[UserRead, Depends(ge
                                     db: Annotated[AsyncSession, Depends(get_async_session)],
                                     apartment: ApartmentCreate = Query(...),
                                     media: Optional[List[UploadFile]] = File(None)):
-    try:
-        return await create_apartment(
-            db=db, apartment=apartment, media=media if media else None, current_user=current_user)
-    except HTTPException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return await create_apartment(
+        db=db, apartment=apartment, media=media if media else None, current_user=current_user)
 
 
 @router.get("/")
@@ -57,7 +54,7 @@ async def delete_apartment_endpoint(current_user: Annotated[UserRead, Depends(ge
                                     apartment_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
     if not current_user.is_superuser:
         HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
-    return await delete_apartment(db, apartment_id)
+    return await delete_apartment(db, apartment_id, current_user.full_name)
 
 
 

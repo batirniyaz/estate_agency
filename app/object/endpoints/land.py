@@ -18,10 +18,7 @@ async def create_land_endpoint(current_user: Annotated[UserRead, Depends(get_cur
                                db: Annotated[AsyncSession, Depends(get_async_session)],
                                land: LandCreate = Query(...),
                                media: Optional[List[UploadFile]] = File(None)):
-    try:
-        return await create_land(db=db, land=land, media=media if media else None, current_user=current_user)
-    except HTTPException as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return await create_land(db=db, land=land, media=media if media else None, current_user=current_user)
 
 
 @router.get("/")
@@ -55,4 +52,4 @@ async def delete_land_endpoint(current_user: Annotated[UserRead, Depends(get_cur
                                land_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
     if not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
-    return await delete_land(db, land_id)
+    return await delete_land(db, land_id, current_user.full_name)
