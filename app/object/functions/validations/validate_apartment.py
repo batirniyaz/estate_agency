@@ -51,5 +51,3 @@ async def validate_apartment(db, apartment):
 
     if not apartment.agent_percent.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be integer")
-
-    return True

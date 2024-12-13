@@ -36,5 +36,3 @@ async def validate_land(db, land):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be greater than 0")
     elif not land.agent_percent.is_integer():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be integer")
-
-    return True
