@@ -100,17 +100,18 @@ async def update_land(
             land.agent_commission = land.agent_percent * land.price / 100
 
         if media and len(media) > 0:
-            await validate_media(media)
+            if not media[0].filename == '':
+                await validate_media(media)
 
-            last_media = db_land.media[-1].url if db_land.media else None
-            if last_media:
-                name, ext = last_media.rsplit('.', 1)
+                last_media = db_land.media[-1].url if db_land.media else None
+                if last_media:
+                    name, ext = last_media.rsplit('.', 1)
 
-            urls = save_upload_file(media, db_land.id, 'land', name[-1] if last_media else None)
-            for url in urls:
-                db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
-                db.add(db_land_media)
-                db_land.media.append(db_land_media)
+                urls = save_upload_file(media, db_land.id, 'land', name[-1] if last_media else None)
+                for url in urls:
+                    db_land_media = LandMedia(land_id=db_land.id, url=url['url'], media_type=url['media_type'])
+                    db.add(db_land_media)
+                    db_land.media.append(db_land_media)
 
         for key, value in land.model_dump(exclude_unset=True).items():
             setattr(db_land, key, value)

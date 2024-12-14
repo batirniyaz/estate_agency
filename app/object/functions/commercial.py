@@ -97,18 +97,19 @@ async def update_commercial(
             commercial.agent_commission = commercial.agent_percent * commercial.price / 100
 
         if media and len(media) > 0:
-            await validate_media(media)
+            if not media[0].filename == '':
+                await validate_media(media)
 
-            last_media = db_commercial.media[-1].url if db_commercial.media else None
+                last_media = db_commercial.media[-1].url if db_commercial.media else None
 
-            if last_media:
-                name, ext = last_media.rsplit('.', 1)
+                if last_media:
+                    name, ext = last_media.rsplit('.', 1)
 
-            urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1] if last_media else None)
-            for url in urls:
-                db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
-                db.add(db_commercial_media)
-                db_commercial.media.append(db_commercial_media)
+                urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1] if last_media else None)
+                for url in urls:
+                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                    db.add(db_commercial_media)
+                    db_commercial.media.append(db_commercial_media)
 
         for key, value in commercial.model_dump(exclude_unset=True).items():
             setattr(db_commercial, key, value)
