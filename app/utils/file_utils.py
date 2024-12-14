@@ -23,7 +23,7 @@ def save_upload_file(upload_file: [UploadFile], object_id, category,
         if " " in file.filename:
             file.filename = file.filename.replace(" ", "_")
 
-        filename, file_extension = file.filename.split(".")
+        filename, file_extension = file.filename.rsplit(".", 1)
 
         file_location = f"{MEDIA_DIR}/{category}/{filename}_{object_id}_{counter}.{file_extension}"
         url = f"storage/{category}/{filename}_{object_id}_{counter}.{file_extension}"

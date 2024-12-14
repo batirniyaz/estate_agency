@@ -103,7 +103,7 @@ async def update_land(
             await validate_media(media)
 
             last_media = db_land.media[-1].url if db_land.media else None
-            name, ext = last_media.split('.')
+            name, ext = last_media.rsplit('.', 1)
 
             urls = save_upload_file(media, db_land.id, 'land', name[-1])
             for url in urls:
@@ -111,7 +111,7 @@ async def update_land(
                 db.add(db_land_media)
                 db_land.media.append(db_land_media)
 
-        for key, value in land.model_dump().items():
+        for key, value in land.model_dump(exclude_unset=True).items():
             setattr(db_land, key, value)
 
         db.add(db_land)

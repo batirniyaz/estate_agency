@@ -100,7 +100,7 @@ async def update_commercial(
             await validate_media(media)
 
             last_media = db_commercial.media[-1].url if db_commercial.media else None
-            name, ext = last_media.split('.')
+            name, ext = last_media.rsplit('.', 1)
 
             urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1])
             for url in urls:

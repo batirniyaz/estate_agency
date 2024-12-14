@@ -97,7 +97,7 @@ async def update_apartment(
             await validate_media(media)
 
             last_media = db_apartment.media[-1].url if db_apartment.media else None
-            name, ext = last_media.split('.')
+            name, ext = last_media.rsplit('.', 1)
 
             urls = save_upload_file(media, db_apartment.id, 'apartment', name[-1])
             for url in urls:
@@ -112,7 +112,7 @@ async def update_apartment(
         await db.commit()
         await db.refresh(db_apartment)
 
-        return db_apartment
+        return jsonable_encoder(db_apartment, exclude_unset=True, exclude_defaults=True)
 
     except IntegrityError as e:
         await db.rollback()
