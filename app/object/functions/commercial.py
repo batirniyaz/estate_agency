@@ -93,7 +93,8 @@ async def update_commercial(
 
         await validate_commercial(db, commercial)
 
-        commercial.agent_commission = commercial.agent_percent * commercial.price / 100
+        if commercial.agent_percent and commercial.price:
+            commercial.agent_commission = commercial.agent_percent * commercial.price / 100
 
         if media:
             await validate_media(media)

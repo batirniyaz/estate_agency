@@ -95,7 +95,9 @@ async def update_land(
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
 
         await validate_land(db, land)
-        land.agent_commission = land.agent_percent * land.price / 100
+
+        if land.agent_percent and land.price:
+            land.agent_commission = land.agent_percent * land.price / 100
 
         if media:
             await validate_media(media)

@@ -90,7 +90,8 @@ async def update_apartment(
     try:
         await validate_apartment(db, apartment)
 
-        apartment.agent_commission = apartment.agent_percent * apartment.price / 100
+        if apartment.agent_percent and apartment.price:
+            apartment.agent_commission = apartment.agent_percent * apartment.price / 100
 
         if media:
             await validate_media(media)
