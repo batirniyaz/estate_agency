@@ -59,7 +59,7 @@ async def create_apartment(
 
 async def get_apartments(db: AsyncSession, limit: int = 10, page: int = 1):
     total_count = await db.scalar(select(func.count(Apartment.id)))
-    result = await db.execute(select(Apartment).limit(limit).offset((page - 1) * limit))
+    result = await db.execute(select(Apartment).order_by(Apartment.id.desc()).limit(limit).offset((page - 1) * limit))
     apartment = result.scalars().all()
 
     return {"data": apartment if apartment else [], "total_count": total_count}

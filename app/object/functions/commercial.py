@@ -61,7 +61,7 @@ async def create_commercial(
 async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
         total_count = await db.scalar(select(func.count(Commercial.id)))
-        result = await db.execute(select(Commercial).limit(limit).offset((page - 1) * limit))
+        result = await db.execute(select(Commercial).order_by(Commercial.id.desc()).limit(limit).offset((page - 1) * limit))
         commercials = result.scalars().all()
 
         return {"data": commercials if commercials else [], "total_count": total_count}

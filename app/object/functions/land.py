@@ -59,7 +59,7 @@ async def create_land(
 async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
         total_count = await db.scalar(select(func.count(Land.id)))
-        result = await db.execute(select(Land).limit(limit).offset((page - 1) * limit))
+        result = await db.execute(select(Land).order_by(Land.id.desc()).limit(limit).offset((page - 1) * limit))
         lands = result.scalars().all()
 
         return {"data": lands if lands else [], "total_count": total_count}
