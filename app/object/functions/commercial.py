@@ -114,7 +114,8 @@ async def update_commercial(
         await db.commit()
         await db.refresh(db_commercial)
 
-        return db_commercial
+        commercial_response = CommercialResponse.model_validate(db_commercial)
+        return jsonable_encoder(commercial_response)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

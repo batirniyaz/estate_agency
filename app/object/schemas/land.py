@@ -87,7 +87,7 @@ class LandUpdate(LandBase):
     current_status: Optional[CurrentStatus] = Field(None, description='The current status of the apartment',
                                                     examples=['FREE', 'BUSY', 'SOON'])
     parking_place: Optional[bool] = Field(None, description="The parking place status of the land", examples=[True, False])
-    agent_percent: Optional[int] = Field(..., description="The agent percent of the land", examples=[10])
+    agent_percent: Optional[int] = Field(None, description="The agent percent of the land", examples=[10])
 
 
 class LandResponse(LandBase):
