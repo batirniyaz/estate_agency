@@ -54,6 +54,8 @@ async def create_apartment(
             print(e)
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Apartment already exists")
         raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
     pass
 
 
