@@ -22,16 +22,16 @@ async def lifespan(main_app: FastAPI):
     register_event_listeners()
     log_queue_task = asyncio.create_task(process_log_queue())
 
-    bot_task = asyncio.create_task(run_bot())
+    # bot_task = asyncio.create_task(run_bot())
 
     try:
         yield
     finally:
-        bot_task.cancel()
+        # bot_task.cancel()
         log_queue_task.cancel()
         try:
             await log_queue_task
-            await bot_task
+            # await bot_task
         except asyncio.CancelledError:
             pass
 
