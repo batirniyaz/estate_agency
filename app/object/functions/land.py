@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
 from app.object.models.land import LandMedia, Land
@@ -41,6 +42,9 @@ async def create_land(
 
         await db.commit()
         await db.refresh(db_land)
+
+        if land.description:
+            await send_message_to_channel(f'<b>{db_land.title}</b>\n\n{db_land.description}\n\n{db_land.crm_id}')
 
         land_response = LandResponse.model_validate(db_land)
         return jsonable_encoder(land_response)

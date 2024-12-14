@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
 from app.object.models.commercial import CommercialMedia, Commercial
@@ -41,6 +42,9 @@ async def create_commercial(
 
         await db.commit()
         await db.refresh(db_commercial)
+
+        if commercial.description:
+            await send_message_to_channel(f'<b>{db_commercial.title}</b>\n\n{db_commercial.description}\n\n{db_commercial.crm_id}')
 
         commercial_response = CommercialResponse.model_validate(db_commercial)
         return jsonable_encoder(commercial_response)

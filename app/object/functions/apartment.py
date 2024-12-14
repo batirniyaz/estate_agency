@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
 from app.object.models.apartment import Apartment, ApartmentMedia
@@ -41,6 +42,9 @@ async def create_apartment(
 
         await db.commit()
         await db.refresh(db_apartment)
+
+        if apartment.description:
+            await send_message_to_channel(f'<b>{db_apartment.title}</b>\n\n{db_apartment.description}\n\n{db_apartment.crm_id}')
 
         apartment_response = ApartmentResponse.model_validate(db_apartment)
         return jsonable_encoder(apartment_response)
