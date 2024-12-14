@@ -18,3 +18,7 @@ async def get_id(message: types.Message):
     mid = message.message_id
     fid = message.from_user.id
     await bot.send_message(message.chat.id, '\n'.join([f'cid: {cid}', f'mid: {mid}', f'fid: {fid}']))
+
+
+async def send_message_to_channel(message: str):
+    await bot.send_message(id_channel, message, parse_mode='HTML')
