@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -53,11 +54,11 @@ async def create_apartment(
 
 
 async def get_apartments(db: AsyncSession, limit: int = 10, page: int = 1):
+    total_count = await db.scalar(select(func.count(Apartment.id)))
     result = await db.execute(select(Apartment).limit(limit).offset((page - 1) * limit))
     apartment = result.scalars().all()
 
-    return apartment if apartment else []
-    pass
+    return {"data": apartment if apartment else [], "total_count": total_count}
 
 
 async def get_apartment(db: AsyncSession, apartment_id: int):
@@ -67,7 +68,6 @@ async def get_apartment(db: AsyncSession, apartment_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Apartment not found")
 
     return apartment
-    pass
 
 
 async def update_apartment(

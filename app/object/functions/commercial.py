@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -55,10 +56,11 @@ async def create_commercial(
 
 async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
+        total_count = await db.scalar(select(func.count(Commercial.id)))
         result = await db.execute(select(Commercial).limit(limit).offset((page - 1) * limit))
         commercials = result.scalars().all()
 
-        return commercials if commercials else []
+        return {"data": commercials if commercials else [], "total_count": total_count}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

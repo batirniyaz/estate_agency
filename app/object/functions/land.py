@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fastapi import HTTPException, status, UploadFile
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -53,10 +54,11 @@ async def create_land(
 
 async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
+        total_count = await db.scalar(select(func.count(Land.id)))
         result = await db.execute(select(Land).limit(limit).offset((page - 1) * limit))
         lands = result.scalars().all()
 
-        return lands if lands else []
+        return {"data": lands if lands else [], "total_count": total_count}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
