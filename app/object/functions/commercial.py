@@ -55,7 +55,7 @@ async def create_commercial(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Commercial already exists")
         raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
 
 async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):

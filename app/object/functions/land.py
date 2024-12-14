@@ -54,6 +54,8 @@ async def create_land(
             print(e)
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Land already exists")
         raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
 
 
 async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
