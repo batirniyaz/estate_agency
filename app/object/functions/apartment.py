@@ -100,12 +100,12 @@ async def update_apartment(
             if last_media:
                 name, ext = last_media.rsplit('.', 1)
 
-                urls = save_upload_file(media, db_apartment.id, 'apartment', name[-1])
-                for url in urls:
-                    db_apartment_media = ApartmentMedia(apartment_id=db_apartment.id, url=url['url'],
-                                                        media_type=url['media_type'])
-                    db.add(db_apartment_media)
-                    db_apartment.media.append(db_apartment_media)
+            urls = save_upload_file(media, db_apartment.id, 'apartment', name[-1] if last_media else None)
+            for url in urls:
+                db_apartment_media = ApartmentMedia(apartment_id=db_apartment.id, url=url['url'],
+                                                    media_type=url['media_type'])
+                db.add(db_apartment_media)
+                db_apartment.media.append(db_apartment_media)
 
         for key, value in apartment.model_dump(exclude_unset=True).items():
             setattr(db_apartment, key, value)
