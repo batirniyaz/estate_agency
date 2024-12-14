@@ -94,18 +94,20 @@ async def update_apartment(
             apartment.agent_commission = apartment.agent_percent * apartment.price / 100
 
         if media and len(media) > 0:
-            await validate_media(media)
+            if not media[0].filename == '':
 
-            last_media = db_apartment.media[-1].url if db_apartment.media else None
-            if last_media:
-                name, ext = last_media.rsplit('.', 1)
+                await validate_media(media)
 
-            urls = save_upload_file(media, db_apartment.id, 'apartment', name[-1] if last_media else None)
-            for url in urls:
-                db_apartment_media = ApartmentMedia(apartment_id=db_apartment.id, url=url['url'],
-                                                    media_type=url['media_type'])
-                db.add(db_apartment_media)
-                db_apartment.media.append(db_apartment_media)
+                last_media = db_apartment.media[-1].url if db_apartment.media else None
+                if last_media:
+                    name, ext = last_media.rsplit('.', 1)
+
+                urls = save_upload_file(media, db_apartment.id, 'apartment', name[-1] if last_media else None)
+                for url in urls:
+                    db_apartment_media = ApartmentMedia(apartment_id=db_apartment.id, url=url['url'],
+                                                        media_type=url['media_type'])
+                    db.add(db_apartment_media)
+                    db_apartment.media.append(db_apartment_media)
 
         for key, value in apartment.model_dump(exclude_unset=True).items():
             setattr(db_apartment, key, value)
