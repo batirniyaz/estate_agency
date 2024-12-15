@@ -87,9 +87,8 @@ async def update_apartment(
     if agent_name != db_apartment.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='This object created by another agent')
 
+    await validate_apartment(db, apartment)
     try:
-        await validate_apartment(db, apartment)
-
         if apartment.agent_percent and apartment.price:
             apartment.agent_commission = apartment.agent_percent * apartment.price / 100
 

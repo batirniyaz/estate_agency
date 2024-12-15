@@ -94,10 +94,9 @@ async def update_commercial(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not allowed to update this commercial")
 
+    await validate_commercial(db, commercial)
+
     try:
-
-        await validate_commercial(db, commercial)
-
         if commercial.agent_percent and commercial.price:
             commercial.agent_commission = commercial.agent_percent * commercial.price / 100
 
