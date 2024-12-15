@@ -34,7 +34,7 @@ async def delete_media_endpoint(
 
 @router.get("/get_media/")
 async def get_media_endpoint(
-        # current_user: UserRead = Depends(get_current_active_user),
+        current_user: UserRead = Depends(get_current_active_user),
         db: AsyncSession = Depends(get_async_session),
         table: str = Query(..., title="Table name", description="Table name to get media from",
                            examples=["land", "apartment", "commercial"]),
@@ -45,7 +45,7 @@ async def get_media_endpoint(
 
 @router.get("/get_media_list/")
 async def get_media_list_endpoint(
-        # current_user: UserRead = Depends(get_current_active_user),
+        current_user: UserRead = Depends(get_current_active_user),
         db: AsyncSession = Depends(get_async_session),
         table: str = Query(..., title="Table name", description="Table name to get media from",
                            examples=["land", "apartment", "commercial"]),
