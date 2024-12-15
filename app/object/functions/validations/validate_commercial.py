@@ -24,7 +24,7 @@ async def validate_commercial(db, commercial):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object square_area must be integer")
 
     if commercial.rooms:
-        if commercial.rooms < 0 or commercial.rooms > 30:
+        if commercial.rooms < 0 or commercial.rooms > 99:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object room must be greater or equal than 0 and less than 30")
 
         if not commercial.rooms.is_integer():
