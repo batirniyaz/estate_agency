@@ -20,8 +20,10 @@ from app.object.functions.validations.validate_commercial import validate_commer
 
 async def create_commercial(
         current_user, db: AsyncSession, commercial: CommercialCreate, media: Optional[List[UploadFile]] = None):
+
+    await validate_commercial(db, commercial)
+
     try:
-        await validate_commercial(db, commercial)
 
         commercial.crm_id = await generate_crm_id(db, Commercial, 'C')
         commercial.responsible = current_user.full_name

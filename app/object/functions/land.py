@@ -20,8 +20,10 @@ from app.object.functions.validations.validate_land import validate_land
 
 async def create_land(
         current_user, db: AsyncSession, land: LandCreate, media: Optional[List[UploadFile]] = None):
+
+    await validate_land(db, land)
+
     try:
-        await validate_land(db, land)
 
         land.crm_id = await generate_crm_id(db, Land, 'L')
         land.responsible = current_user.full_name

@@ -20,8 +20,10 @@ from app.object.functions.validations.validate_apartment import validate_apartme
 
 async def create_apartment(
         current_user, db: AsyncSession, apartment: ApartmentCreate, media: Optional[List[UploadFile]] = None):
+
+    await validate_apartment(db, apartment)
+
     try:
-        await validate_apartment(db, apartment)
 
         apartment.crm_id = await generate_crm_id(db, Apartment, 'A')
         apartment.responsible = current_user.full_name
