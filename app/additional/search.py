@@ -2,6 +2,7 @@ from operator import attrgetter
 import logging
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -32,3 +33,16 @@ async def search(db: AsyncSession, text: str):
     except Exception as e:
         logger.error(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+async def get_all_object(db: AsyncSession):
+    land_count = await db.scalar(select(func.count(Land.id)))
+    apartment_count = await db.scalar(select(func.count(Apartment.id)))
+    commercial_count = await db.scalar(select(func.count(Commercial.id)))
+
+    return {
+        "land": land_count,
+        "apartment": apartment_count,
+        "commercial": commercial_count,
+        "total": land_count + apartment_count + commercial_count
+    }
