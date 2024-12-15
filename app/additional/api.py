@@ -7,7 +7,7 @@ from app.additional.delete_media import delete_media, get_media_by_id, get_media
 from app.auth.schema import UserRead
 from app.auth.utils import get_current_active_user
 from app.database import get_async_session
-from app.additional.search import search
+from app.additional.search import search, get_all_object
 
 router = APIRouter()
 
@@ -53,3 +53,11 @@ async def get_media_list_endpoint(
         page: int = Query(1, title="Page", description="Page number")
 ):
     return await get_media(db, table, limit, page)
+
+
+@router.get("/get_all_object/")
+async def get_all_object_endpoint(
+        current_user: UserRead = Depends(get_current_active_user),
+        db: AsyncSession = Depends(get_async_session),
+):
+    return await get_all_object(db)
