@@ -54,7 +54,7 @@ async def delete_apartment_endpoint(current_user: Annotated[UserRead, Depends(ge
                                     apartment_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
     if not current_user.is_superuser:
         HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
-    return await delete_apartment(db, apartment_id, current_user.full_name)
+    return await delete_apartment(db, apartment_id)
 
 
 

@@ -126,14 +126,10 @@ async def update_apartment(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-async def delete_apartment(db: AsyncSession, apartment_id: int, agent_name: str):
+async def delete_apartment(db: AsyncSession, apartment_id: int):
+    db_apartment = await get_apartment(db, apartment_id)
+
     try:
-        db_apartment = await get_apartment(db, apartment_id)
-
-        if agent_name != db_apartment.responsible:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                                detail="You are not allowed to delete this commercial")
-
         for media in db_apartment.media:
             file_path = os.path.join("app/storage", "apartment", os.path.basename(media.url))
             if os.path.exists(file_path):

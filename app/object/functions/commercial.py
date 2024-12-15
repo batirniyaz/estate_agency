@@ -86,10 +86,12 @@ async def update_commercial(
         agent_name,
         media: Optional[List[UploadFile]] = None
 ):
+    db_commercial = await get_commercial(db, commercial_id)
+    if agent_name != db_commercial.responsible:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="You are not allowed to update this commercial")
+
     try:
-        db_commercial = await get_commercial(db, commercial_id)
-        if agent_name != db_commercial.responsible:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not allowed to update this commercial")
 
         await validate_commercial(db, commercial)
 
@@ -123,12 +125,10 @@ async def update_commercial(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-async def delete_commercial(db: AsyncSession, commercial_id: int, agent_name):
-    try:
-        db_commercial = await get_commercial(db, commercial_id)
-        if agent_name != db_commercial.responsible:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not allowed to delete this commercial")
+async def delete_commercial(db: AsyncSession, commercial_id: int):
+    db_commercial = await get_commercial(db, commercial_id)
 
+    try:
         for media in db_commercial.media:
             file_path = os.path.join("app/storage", "commercial", os.path.basename(media.url))
             if os.path.exists(file_path):

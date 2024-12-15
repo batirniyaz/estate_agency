@@ -89,10 +89,11 @@ async def update_land(
         agent_name,
         media: Optional[List[UploadFile]] = None
 ):
+    db_land = await get_land(db, land_id)
+    if agent_name != db_land.responsible:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
+
     try:
-        db_land = await get_land(db, land_id)
-        if agent_name != db_land.responsible:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
 
         await validate_land(db, land)
 
@@ -127,13 +128,10 @@ async def update_land(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-async def delete_land(db: AsyncSession, land_id: int, agent_name):
+async def delete_land(db: AsyncSession, land_id: int):
+    db_land = await get_land(db, land_id)
+
     try:
-        db_land = await get_land(db, land_id)
-
-        if agent_name != db_land.responsible:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
-
         for media in db_land.media:
             file_path = os.path.join("app/storage", "land", os.path.basename(media.url))
             if os.path.exists(file_path):
