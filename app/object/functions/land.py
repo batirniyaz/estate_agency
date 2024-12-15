@@ -70,16 +70,12 @@ async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
 
 
 async def get_land(db: AsyncSession, land_id: int):
-    try:
-        result = await db.execute(select(Land).filter_by(id=land_id))
-        land = result.scalars().first()
+    result = await db.execute(select(Land).filter_by(id=land_id))
+    land = result.scalars().first()
+    if not land:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Land not found")
 
-        if not land:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Land not found")
-
-        return land
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return land
 
 
 async def update_land(
@@ -94,7 +90,6 @@ async def update_land(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
 
     try:
-
         await validate_land(db, land)
 
         if land.agent_percent and land.price:

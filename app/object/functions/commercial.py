@@ -36,7 +36,8 @@ async def create_commercial(
 
             urls = save_upload_file(media, db_commercial.id, 'commercial')
             for url in urls:
-                db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'],
+                                                      media_type=url['media_type'])
                 db.add(db_commercial_media)
                 db_commercial.media.append(db_commercial_media)
 
@@ -44,7 +45,8 @@ async def create_commercial(
         await db.refresh(db_commercial)
 
         if commercial.description:
-            await send_message_to_channel(f'<b>{db_commercial.title}</b>\n\n{db_commercial.description}\n\n{db_commercial.crm_id}')
+            await send_message_to_channel(
+                f'<b>{db_commercial.title}</b>\n\n{db_commercial.description}\n\n{db_commercial.crm_id}')
 
         commercial_response = CommercialResponse.model_validate(db_commercial)
         return jsonable_encoder(commercial_response)
@@ -61,7 +63,8 @@ async def create_commercial(
 async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
         total_count = await db.scalar(select(func.count(Commercial.id)))
-        result = await db.execute(select(Commercial).order_by(Commercial.id.desc()).limit(limit).offset((page - 1) * limit))
+        result = await db.execute(
+            select(Commercial).order_by(Commercial.id.desc()).limit(limit).offset((page - 1) * limit))
         commercials = result.scalars().all()
 
         return {"data": commercials if commercials else [], "total_count": total_count}
@@ -70,13 +73,12 @@ async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):
 
 
 async def get_commercial(db: AsyncSession, commercial_id: int):
-    try:
-        result = await db.execute(select(Commercial).filter_by(id=commercial_id))
-        commercial = result.scalars().first()
+    result = await db.execute(select(Commercial).filter_by(id=commercial_id))
+    commercial = result.scalars().first()
+    if not commercial:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Commercial not found")
 
-        return commercial if commercial else []
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return commercial
 
 
 async def update_commercial(
@@ -87,6 +89,7 @@ async def update_commercial(
         media: Optional[List[UploadFile]] = None
 ):
     db_commercial = await get_commercial(db, commercial_id)
+    print(db_commercial)
     if agent_name != db_commercial.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not allowed to update this commercial")
@@ -109,7 +112,8 @@ async def update_commercial(
 
                 urls = save_upload_file(media, db_commercial.id, 'commercial', name[-1] if last_media else None)
                 for url in urls:
-                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'], media_type=url['media_type'])
+                    db_commercial_media = CommercialMedia(commercial_id=db_commercial.id, url=url['url'],
+                                                          media_type=url['media_type'])
                     db.add(db_commercial_media)
                     db_commercial.media.append(db_commercial_media)
 
