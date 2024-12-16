@@ -46,7 +46,19 @@ async def create_land(
         await db.refresh(db_land)
 
         if land.description:
-            await send_message_to_channel(f'<b>{db_land.title}</b>\n\n{db_land.description}\n\n{db_land.crm_id}')
+            await send_message_to_channel(f'<b>Сдаётся шикарная коммерция🏡</b>\n\n📍Район: {db_land.district}\n'
+                                          f'📍Адрес: {db_land.title}\n\n'
+                                          f'🎯{db_land.rooms} комн {db_land.floor_number}'
+                                          f'\n🎯Площадь: {db_land.square_area} м²\n'
+                                          f'🎯{db_land.house_condition}✅\n'
+                                          f'🎯Mебель {"✅" if db_land.furnished else "❌"}\n\n'
+                                          f'❗Депозит: Договорная'
+                                          f'❗Предоплата: Договорная'
+                                          f'💰Цена: {db_land.price}$ есть торг'
+                                          f'🌀Срм - {db_land.crm_id}\n\n'
+                                          f'С уважением {db_land.responsible}\n'
+                                          f'Специалист по недвижимости!\n'
+                                          f'Имеется также более 10000 вариантов по всему городу.✅\n')
 
         land_response = LandResponse.model_validate(db_land)
         return jsonable_encoder(land_response)
