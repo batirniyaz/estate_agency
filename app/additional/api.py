@@ -17,9 +17,11 @@ router = APIRouter()
 async def search_endpoint(
         current_user: UserRead = Depends(get_current_active_user),
         db: AsyncSession = Depends(get_async_session),
-        text: str = Query(..., title="Search text", description="Text to search")
+        text: str = Query(..., title="Search text", description="Text to search"),
+        table: str = Query(..., title="Table name", description="Table name to search",
+                           examples=["land", "apartment", "commercial"])
 ):
-    return await search(db, text)
+    return await search(db, text, table)
 
 
 @router.delete("/delete_media/")
