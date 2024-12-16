@@ -2,7 +2,7 @@ from operator import attrgetter
 import logging
 
 from fastapi import HTTPException, status
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -13,26 +13,31 @@ from app.object.models.land import Land
 logger = logging.getLogger(__name__)
 
 
-async def search(db: AsyncSession, text: str):
+async def search(db: AsyncSession, text: str, table: str):
+    table_mapping = {
+        "land": Land,
+        "apartment": Apartment,
+        "commercial": Commercial
+    }
+    table_obj = table_mapping.get(table)
+    if not table_obj:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid table name")
+
     matched_objects = []
     try:
-        land_res = select(Land).where(Land.title.ilike(f'%{text}%'))
-        db_land = await db.execute(land_res)
-        matched_objects.extend(db_land.scalars().all())
+        res = select(table_obj).where(or_(
+            table_obj.title.ilike(f'%{text}%'),
+            table_obj.crm_id.ilike(f'%{text}%'),
+            )
+        )
+        db_res = await db.execute(res)
+        matched_objects.extend(db_res.scalars().all())
 
-        apartment_res = select(Apartment).where(Apartment.title.ilike(f'%{text}%'))
-        db_apartment = await db.execute(apartment_res)
-        matched_objects.extend(db_apartment.scalars().all())
-
-        commercial_res = select(Commercial).where(Commercial.title.ilike(f'%{text}%'))
-        db_commercial = await db.execute(commercial_res)
-        matched_objects.extend(db_commercial.scalars().all())
-
-        matched_objects = sorted(matched_objects, key=attrgetter('id'))
-        return matched_objects
     except Exception as e:
         logger.error(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    return matched_objects
 
 
 async def get_all_object(db: AsyncSession):
