@@ -8,3 +8,16 @@ async def generate_crm_id(db: AsyncSession, my_object, letter):
     next_id = (max_id.id + 1) if max_id else 1
     crm_id = f"{letter}{next_id}"
     return crm_id
+
+
+house_condition_translation = {
+    "EURO": "Евроремонт",
+    "NORMAL": "Среднее",
+    "REPAIR": 'Требует ремонта',
+}
+
+bathroom_translation = {
+    "SEPERATED": "Раздельный",
+    "COMBINED": "Совмещенный",
+    "MANY": "2 и более",
+}

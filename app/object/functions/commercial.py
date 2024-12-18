@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.bot.handlers import send_message_to_channel
-from app.object.functions import generate_crm_id
+from app.object.functions import generate_crm_id, house_condition_translation
 from app.object.functions.validations.validate_media import validate_media
 from app.object.models.commercial import CommercialMedia, Commercial
 from app.object.schemas.commercial import CommercialCreate, CommercialResponse, CommercialUpdate
@@ -51,11 +51,11 @@ async def create_commercial(
                                           f'📍Адрес: {db_commercial.title}\n\n'
                                           f'🎯{db_commercial.rooms} комн {db_commercial.floor_number}'
                                           f'\n🎯Площадь: {db_commercial.square_area} м²\n'
-                                          f'🎯{db_commercial.house_condition}✅\n'
+                                          f'🎯{house_condition_translation.get(db_commercial.house_condition.name)}✅\n'
                                           f'🎯Mебель {"✅" if db_commercial.furnished else "❌"}\n\n'
-                                          f'❗Депозит: Договорная'
-                                          f'❗Предоплата: Договорная'
-                                          f'💰Цена: {db_commercial.price}$ есть торг'
+                                          f'❗Депозит: Договорная\n'
+                                          f'❗Предоплата: Договорная\n'
+                                          f'💰Цена: {db_commercial.price}$ есть торг\n'
                                           f'🌀Срм - {db_commercial.crm_id}\n\n'
                                           f'С уважением {db_commercial.responsible}\n'
                                           f'Специалист по недвижимости!\n'

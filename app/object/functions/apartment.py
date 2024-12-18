@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.bot.handlers import send_message_to_channel
-from app.object.functions import generate_crm_id
+from app.object.functions import generate_crm_id, house_condition_translation, bathroom_translation
 from app.object.functions.validations.validate_media import validate_media
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.schemas.apartment import ApartmentCreate, ApartmentUpdate, ApartmentResponse
@@ -50,11 +50,11 @@ async def create_apartment(
                                           f'📍Адрес: {db_apartment.title}\n\n'
                                           f'🎯{db_apartment.rooms} комн {db_apartment.floor}/{db_apartment.floor_number}'
                                           f'\n🎯Площадь: {db_apartment.square_area} м²\n'
-                                          f'🎯{db_apartment.house_condition}✅\n'
-                                          f'🎯{db_apartment.bathroom}✅\n\n'
-                                          f'❗Депозит: Договорная'
-                                          f'❗Предоплата: Договорная'
-                                          f'💰Цена: {db_apartment.price}$ есть торг'
+                                          f'🎯{house_condition_translation.get(db_apartment.house_condition.name, db_apartment.house_condition.name)}✅\n'
+                                          f'🎯Санузел {bathroom_translation.get(db_apartment.bathroom.name, db_apartment.bathroom.name)}✅\n\n'
+                                          f'❗Депозит: Договорная\n'
+                                          f'❗Предоплата: Договорная\n'
+                                          f'💰Цена: {db_apartment.price}$ есть торг\n'
                                           f'🌀Срм - {db_apartment.crm_id}\n\n'
                                           f'С уважением {db_apartment.responsible}\n'
                                           f'Специалист по недвижимости!\n'
