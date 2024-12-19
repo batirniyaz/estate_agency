@@ -99,11 +99,12 @@ async def update_apartment(
         db: AsyncSession,
         apartment_id: int,
         apartment: ApartmentUpdate,
-        agent_name: str,
+        user,
         media: Optional[List[UploadFile]] = None
 ):
     db_apartment = await get_apartment(db, apartment_id)
-    if agent_name != db_apartment.responsible:
+    print(user.is_superuser)
+    if not user.is_superuser and user.full_name != db_apartment.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='This object created by another agent')
 
     await validate_apartment(db, apartment)

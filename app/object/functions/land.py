@@ -100,11 +100,11 @@ async def update_land(
         db: AsyncSession,
         land_id: int,
         land: LandUpdate,
-        agent_name,
+        user,
         media: Optional[List[UploadFile]] = None
 ):
     db_land = await get_land(db, land_id)
-    if agent_name != db_land.responsible:
+    if user.full_name != db_land.responsible and not user.is_superuser:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
 
     await validate_land(db, land)

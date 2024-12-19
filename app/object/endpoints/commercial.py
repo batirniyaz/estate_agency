@@ -50,7 +50,7 @@ async def update_commercial_endpoint(current_user: Annotated[UserRead, Depends(g
                                      media: Optional[List[UploadFile]] = File(None)):
     return await update_commercial(
         db=db, commercial_id=commercial_id, commercial=commercial,
-        agent_name=current_user.full_name, media=media if media else None)
+        user=current_user, media=media if media else None)
 
 
 @router.delete("/{commercial_id}")

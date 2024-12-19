@@ -47,7 +47,7 @@ async def update_apartment_endpoint(current_user: Annotated[UserRead, Depends(ge
                                     media: Optional[List[UploadFile]] = File(None)):
     return await update_apartment(
         db=db, apartment_id=apartment_id,
-        apartment=apartment, agent_name=current_user.full_name,
+        apartment=apartment, user=current_user,
         media=media if media else None)
 
 

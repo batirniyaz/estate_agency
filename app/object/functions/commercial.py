@@ -103,12 +103,12 @@ async def update_commercial(
         db: AsyncSession,
         commercial_id: int,
         commercial: CommercialUpdate,
-        agent_name,
+        user,
         media: Optional[List[UploadFile]] = None
 ):
     db_commercial = await get_commercial(db, commercial_id)
     print(db_commercial)
-    if agent_name != db_commercial.responsible:
+    if not user.is_superuser and user.full_name != db_commercial.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not allowed to update this commercial")
 

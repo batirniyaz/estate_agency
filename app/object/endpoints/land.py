@@ -45,7 +45,7 @@ async def update_land_endpoint(current_user: Annotated[UserRead, Depends(get_cur
                                db: Annotated[AsyncSession, Depends(get_async_session)],
                                land_id: int, land: LandUpdate = Query(...),
                                media: Optional[List[UploadFile]] = File(None)):
-    return await update_land(db=db, land_id=land_id, land=land, agent_name=current_user.full_name,
+    return await update_land(db=db, land_id=land_id, land=land, user=current_user,
                              media=media if media else None)
 
 
