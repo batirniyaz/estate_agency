@@ -1,7 +1,7 @@
 import os
 from typing import Optional, List
 
-from fastapi import HTTPException, status, UploadFile
+from fastapi import HTTPException, status, UploadFile, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -19,7 +19,11 @@ from app.object.functions.validations.validate_commercial import validate_commer
 
 
 async def create_commercial(
-        current_user, db: AsyncSession, commercial: CommercialCreate, media: Optional[List[UploadFile]] = None):
+        current_user, db: AsyncSession,
+        commercial: CommercialCreate,
+        media: Optional[List[UploadFile]] = None,
+        background_tasks: BackgroundTasks = None
+):
 
     await validate_commercial(db, commercial)
 
@@ -46,20 +50,21 @@ async def create_commercial(
         await db.commit()
         await db.refresh(db_commercial)
 
-        if commercial.description:
-            await send_message_to_channel(f'<b>Сдаётся шикарная коммерция🏡</b>\n\n📍Район: {db_commercial.district}\n'
-                                          f'📍Адрес: {db_commercial.title}\n\n'
-                                          f'🎯{db_commercial.rooms} комн {db_commercial.floor_number}'
-                                          f'\n🎯Площадь: {db_commercial.square_area} м²\n'
-                                          f'🎯{house_condition_translation.get(db_commercial.house_condition.name)}✅\n'
-                                          f'🎯Mебель {"✅" if db_commercial.furnished else "❌"}\n\n'
-                                          f'❗Депозит: Договорная\n'
-                                          f'❗Предоплата: Договорная\n'
-                                          f'💰Цена: {db_commercial.price}$ есть торг\n'
-                                          f'🌀Срм - {db_commercial.crm_id}\n\n'
-                                          f'С уважением {db_commercial.responsible}\n'
-                                          f'Специалист по недвижимости!\n'
-                                          f'Имеется также более 10000 вариантов по всему городу.✅\n')
+        message = (f'<b>Сдаётся шикарная коммерция🏡</b>\n\n📍Район: {db_commercial.district}\n'
+                                      f'📍Адрес: {db_commercial.title}\n\n'
+                                      f'🎯{db_commercial.rooms} комн {db_commercial.floor_number}'
+                                      f'\n🎯Площадь: {db_commercial.square_area} м²\n'
+                                      f'🎯{house_condition_translation.get(db_commercial.house_condition.name)}✅\n'
+                                      f'🎯Mебель {"✅" if db_commercial.furnished else "❌"}\n\n'
+                                      f'❗Депозит: Договорная\n'
+                                      f'❗Предоплата: Договорная\n'
+                                      f'💰Цена: {db_commercial.price}$ есть торг\n'
+                                      f'🌀Срм - {db_commercial.crm_id}\n\n'
+                                      f'С уважением {db_commercial.responsible}\n'
+                                      f'Специалист по недвижимости!\n'
+                                      f'Имеется также более 10000 вариантов по всему городу.✅\n')
+
+        background_tasks.add_task(send_message_to_channel, message, db_commercial.media)
 
         commercial_response = CommercialResponse.model_validate(db_commercial)
         return jsonable_encoder(commercial_response)

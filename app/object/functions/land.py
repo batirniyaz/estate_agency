@@ -1,7 +1,7 @@
 import os
 from typing import Optional, List
 
-from fastapi import HTTPException, status, UploadFile
+from fastapi import HTTPException, status, UploadFile, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -19,7 +19,10 @@ from app.object.functions.validations.validate_land import validate_land
 
 
 async def create_land(
-        current_user, db: AsyncSession, land: LandCreate, media: Optional[List[UploadFile]] = None):
+        current_user, db: AsyncSession, land: LandCreate,
+        media: Optional[List[UploadFile]] = None,
+        background_tasks: BackgroundTasks = None,
+):
 
     await validate_land(db, land)
 
@@ -45,20 +48,21 @@ async def create_land(
         await db.commit()
         await db.refresh(db_land)
 
-        if land.description:
-            await send_message_to_channel(f'<b>Сдаётся шикарная коммерция🏡</b>\n\n📍Район: {db_land.district}\n'
-                                          f'📍Адрес: {db_land.title}\n\n'
-                                          f'🎯{db_land.rooms} комн {db_land.floor_number}'
-                                          f'\n🎯Площадь: {db_land.square_area} м²\n'
-                                          f'🎯{house_condition_translation.get(db_land.house_condition.name)}✅\n'
-                                          f'🎯Mебель {"✅" if db_land.furnished else "❌"}\n\n'
-                                          f'❗Депозит: Договорная\n'
-                                          f'❗Предоплата: Договорная\n'
-                                          f'💰Цена: {db_land.price}$ есть торг\n'
-                                          f'🌀Срм - {db_land.crm_id}\n\n'
-                                          f'С уважением {db_land.responsible}\n'
-                                          f'Специалист по недвижимости!\n'
-                                          f'Имеется также более 10000 вариантов по всему городу.✅\n')
+        message = (f'<b>Сдаётся шикарный участок🏡</b>\n\n📍Район: {db_land.district}\n'
+                                      f'📍Адрес: {db_land.title}\n\n'
+                                      f'🎯{db_land.rooms} комн {db_land.floor_number}'
+                                      f'\n🎯Площадь: {db_land.square_area} м²\n'
+                                      f'🎯{house_condition_translation.get(db_land.house_condition.name)}✅\n'
+                                      f'🎯Mебель {"✅" if db_land.furnished else "❌"}\n\n'
+                                      f'❗Депозит: Договорная\n'
+                                      f'❗Предоплата: Договорная\n'
+                                      f'💰Цена: {db_land.price}$ есть торг\n'
+                                      f'🌀Срм - {db_land.crm_id}\n\n'
+                                      f'С уважением {db_land.responsible}\n'
+                                      f'Специалист по недвижимости!\n'
+                                      f'Имеется также более 10000 вариантов по всему городу.✅\n')
+
+        background_tasks.add_task(send_message_to_channel, message, db_land.media)
 
         land_response = LandResponse.model_validate(db_land)
         return jsonable_encoder(land_response)
