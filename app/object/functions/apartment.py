@@ -49,21 +49,21 @@ async def create_apartment(
         await db.commit()
         await db.refresh(db_apartment)
 
-        # message = (f'<b>Сдаётся шикарная квартира🏡</b>\n\n📍Район: {db_apartment.district}\n'
-        #            f'📍Адрес: {db_apartment.title}\n\n'
-        #            f'🎯{db_apartment.rooms} комн {db_apartment.floor}/{db_apartment.floor_number}'
-        #            f'\n🎯Площадь: {db_apartment.square_area} м²\n'
-        #            f'🎯{house_condition_translation.get(db_apartment.house_condition.name, db_apartment.house_condition.name)}✅\n'
-        #            f'🎯Санузел {bathroom_translation.get(db_apartment.bathroom.name, db_apartment.bathroom.name)}✅\n\n'
-        #            f'❗Депозит: Договорная\n'
-        #            f'❗Предоплата: Договорная\n'
-        #            f'💰Цена: {db_apartment.price}$ есть торг\n'
-        #            f'🌀Срм - {db_apartment.crm_id}\n\n'
-        #            f'С уважением {db_apartment.responsible}\n'
-        #            f'Специалист по недвижимости!\n'
-        #            f'Имеется также более 10000 вариантов по всему городу.✅\n')
-        #
-        # background_tasks.add_task(send_message_to_channel, message, db_apartment.media)
+        message = (f'<b>Сдаётся шикарная квартира🏡</b>\n\n📍Район: {db_apartment.district}\n'
+                   f'📍Адрес: {db_apartment.title}\n\n'
+                   f'🎯{db_apartment.rooms} комн {db_apartment.floor}/{db_apartment.floor_number}'
+                   f'\n🎯Площадь: {db_apartment.square_area} м²\n'
+                   f'🎯{house_condition_translation.get(db_apartment.house_condition.name, db_apartment.house_condition.name)}✅\n'
+                   f'🎯Санузел {bathroom_translation.get(db_apartment.bathroom.name, db_apartment.bathroom.name)}✅\n\n'
+                   f'❗Депозит: Договорная\n'
+                   f'❗Предоплата: Договорная\n'
+                   f'💰Цена: {db_apartment.price}$ есть торг\n'
+                   f'🌀Срм - {db_apartment.crm_id}\n\n'
+                   f'С уважением {db_apartment.responsible}\n'
+                   f'Специалист по недвижимости!\n'
+                   f'Имеется также более 10000 вариантов по всему городу.✅\n')
+
+        background_tasks.add_task(send_message_to_channel, message, db_apartment.media)
 
         apartment_response = ApartmentResponse.model_validate(db_apartment)
         return jsonable_encoder(apartment_response)
