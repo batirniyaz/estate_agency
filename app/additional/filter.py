@@ -8,11 +8,13 @@ from sqlalchemy.future import select
 from app.object.models.apartment import Apartment
 from app.object.models.commercial import Commercial
 from app.object.models.land import Land
+from app.object.models import ActionType
 
 
 async def filter_objects(
         db: AsyncSession,
         table: Optional[str] = None,
+        action_type: Optional[ActionType] = None,
         district: Optional[str] = None,
         metro_st: Optional[str] = None,
         furniture: Optional[bool] = None,
@@ -38,6 +40,9 @@ async def filter_objects(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid table name")
 
     stmt = select(table_obj)
+
+    if action_type:
+        stmt = stmt.filter_by(action_type=action_type)
 
     if district:
         stmt = stmt.filter_by(district=district)

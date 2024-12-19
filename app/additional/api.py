@@ -9,6 +9,7 @@ from app.auth.utils import get_current_active_user
 from app.database import get_async_session
 from app.additional.search import search, get_all_object
 from app.additional.filter import filter_objects
+from app.object.models import ActionType
 
 router = APIRouter()
 
@@ -72,6 +73,7 @@ async def filter_objects_endpoint(
         db: AsyncSession = Depends(get_async_session),
         table: str = Query(..., title="Table name", description="Table name to filter",
                            examples=["land", "apartment", "commercial"]),
+        action_type: ActionType = Query(None, title="Action type", description="Action type"),
         district: str = Query(None, title="District", description="District name"),
         metro_st: str = Query(None, title="Metro station", description="Metro station name"),
         furniture: bool = Query(None, title="Furniture", description="Furniture availability"),
@@ -89,6 +91,7 @@ async def filter_objects_endpoint(
     return await filter_objects(
         db=db, table=table,
         district=district if district else None,
+        action_type=action_type if action_type else None,
         metro_st=metro_st if metro_st else None,
         furniture=furniture if furniture else None,
         bathroom=bathroom if bathroom else None,
