@@ -1,6 +1,6 @@
 from typing import List, Annotated, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Query
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Query, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schema import UserRead
@@ -15,10 +15,12 @@ router = APIRouter()
 @router.post("/")
 async def create_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                     db: Annotated[AsyncSession, Depends(get_async_session)],
+                                    background_tasks: BackgroundTasks,
                                     apartment: ApartmentCreate = Query(...),
-                                    media: Optional[List[UploadFile]] = File(None)):
+                                    media: Optional[List[UploadFile]] = File(None),):
     return await create_apartment(
-        db=db, apartment=apartment, media=media if media else None, current_user=current_user)
+        db=db, apartment=apartment, media=media if media else None, current_user=current_user,
+        background_tasks=background_tasks)
 
 
 @router.get("/")
