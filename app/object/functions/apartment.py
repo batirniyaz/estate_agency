@@ -32,6 +32,8 @@ async def create_apartment(
         apartment.crm_id = await generate_crm_id(db, Apartment, 'A')
         apartment.responsible = current_user.full_name
         apartment.agent_commission = apartment.agent_percent * apartment.price / 100
+        if apartment.second_responsible and apartment.second_agent_percent:
+            apartment.second_agent_commission = apartment.second_agent_percent * apartment.price / 100
         db_apartment = Apartment(**apartment.model_dump())
         db.add(db_apartment)
         await db.commit()
@@ -111,6 +113,9 @@ async def update_apartment(
     try:
         if apartment.agent_percent and apartment.price:
             apartment.agent_commission = apartment.agent_percent * apartment.price / 100
+
+        if apartment.second_responsible and apartment.second_agent_percent and apartment.price:
+            apartment.second_agent_commission = apartment.second_agent_percent * apartment.price / 100
 
         if media and len(media) > 0:
             if not media[0].filename == '':

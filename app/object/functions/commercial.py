@@ -32,6 +32,9 @@ async def create_commercial(
         commercial.crm_id = await generate_crm_id(db, Commercial, 'C')
         commercial.responsible = current_user.full_name
         commercial.agent_commission = commercial.agent_percent * commercial.price / 100
+        if commercial.second_responsible and commercial.second_agent_percent:
+            commercial.second_agent_commission = commercial.second_agent_percent * commercial.price / 100
+
         db_commercial = Commercial(**commercial.model_dump())
         db.add(db_commercial)
         await db.commit()
@@ -117,6 +120,9 @@ async def update_commercial(
     try:
         if commercial.agent_percent and commercial.price:
             commercial.agent_commission = commercial.agent_percent * commercial.price / 100
+
+        if commercial.second_responsible and commercial.second_agent_percent and commercial.price:
+            commercial.second_agent_commission = commercial.second_agent_percent * commercial.price / 100
 
         if media and len(media) > 0:
             if not media[0].filename == '':

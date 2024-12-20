@@ -31,6 +31,9 @@ async def create_land(
         land.crm_id = await generate_crm_id(db, Land, 'L')
         land.responsible = current_user.full_name
         land.agent_commission = land.agent_percent * land.price / 100
+        if land.second_responsible and land.second_agent_percent:
+            land.second_agent_commission = land.second_agent_percent * land.price / 100
+
         db_land = Land(**land.model_dump())
         db.add(db_land)
         await db.commit()
@@ -112,6 +115,8 @@ async def update_land(
 
         if land.agent_percent and land.price:
             land.agent_commission = land.agent_percent * land.price / 100
+        if land.second_agent_percent and land.price and land.second_responsible:
+            land.second_agent_commission = land.second_agent_percent * land.price / 100
 
         if media and len(media) > 0:
             if not media[0].filename == '':
