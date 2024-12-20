@@ -51,9 +51,16 @@ class CommercialBase(BaseModel):
                                             examples=["EURO", "NORMAL", "REPAIR"])
     current_status: CurrentStatus = Field(None, description='The current status of the apartment',
                                           examples=['FREE', 'BUSY', 'SOON'])
+    status_date: Optional[str] = Field(None, description="The status date of the commercial", examples=["2022-01-01"])
     parking_place: bool = Field(..., description="The parking place status of the commercial", examples=[True, False])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the commercial", examples=[10])
     agent_commission: Optional[float] = Field(None, description="The agent commission of the commercial", examples=[100])
+    second_responsible: Optional[str] = Field(None, description="The second responsible person of the commercial",
+                                              examples=["John Doe"])
+    second_agent_percent: Optional[int] = Field(None, description="The second agent percent of the commercial",
+                                                examples=[10])
+    second_agent_commission: Optional[float] = Field(None, description="The second agent commission of the commercial",
+                                                     examples=[100])
 
 
 class CommercialCreate(CommercialBase):

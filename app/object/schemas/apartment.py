@@ -57,12 +57,17 @@ class ApartmentBase(BaseModel):
                                             examples=["EURO", "NORMAL", "REPAIR"])
     current_status: CurrentStatus = Field(..., description='The current status of the apartment',
                                           examples=['FREE', 'BUSY', 'SOON'])
+    status_date: Optional[str] = Field(None, description="The status date of the apartment", examples=["2022-01-01"])
     name: str = Field(..., min_length=3, max_length=100, description="The name of the contact person",
                       examples=["John Doe"])
     phone_number: str = Field(..., min_length=3, max_length=13, description="The phone number of the contact person",
                               examples=["+998901234567"])
     agent_percent: Optional[int] = Field(..., description="The agent percent of the apartment", examples=[10])
     agent_commission: Optional[float] = Field(None, description="The agent commission of the apartment", examples=[100])
+    second_responsible: Optional[str] = Field(None, max_length=100)
+    second_agent_percent: Optional[int] = Field(None, description="The second agent percent of the apartment", examples=[10])
+    second_agent_commission: Optional[float] = Field(None, description="The second agent commission of the apartment",
+                                                     examples=[100])
 
 
 class ApartmentCreate(ApartmentBase):
