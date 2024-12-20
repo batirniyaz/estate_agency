@@ -53,12 +53,16 @@ class Land(Base):
     furnished: Mapped[bool] = mapped_column(Boolean)
     house_condition: Mapped[HouseCondition] = mapped_column(Enum(HouseCondition))
     current_status: Mapped[CurrentStatus] = mapped_column(Enum(CurrentStatus), nullable=True)
+    status_date: Mapped[str] = mapped_column(String(10), nullable=True)
     parking_place: Mapped[bool] = mapped_column(Boolean)
 
     # Agent
     responsible: Mapped[str] = mapped_column(String)
+    second_responsible: Mapped[str] = mapped_column(String, nullable=True)
     agent_percent: Mapped[int] = mapped_column(Integer, nullable=True)
+    second_agent_percent: Mapped[int] = mapped_column(Integer, nullable=True)
     agent_commission: Mapped[float] = mapped_column(Float, nullable=True)
+    second_agent_commission: Mapped[float] = mapped_column(Float, nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
