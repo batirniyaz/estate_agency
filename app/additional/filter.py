@@ -69,7 +69,8 @@ async def filter_objects(
         stmt = stmt.filter_by(district=district)
 
     if metro_st:
-        stmt = stmt.filter_by(metro_st=metro_st)
+        if table == 'apartment':
+            stmt = stmt.filter_by(metro_st=metro_st)
 
     if furniture:
         stmt = stmt.filter_by(furnished=furniture)
