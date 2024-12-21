@@ -62,6 +62,7 @@ class LandBase(BaseModel):
                                                 examples=[10])
     second_agent_commission: Optional[float] = Field(None, description="The second agent commission of the land",
                                                      examples=[100])
+    deal: bool = Field(False, description="The deal status of the land", examples=[True, False])
 
 
 class LandCreate(LandBase):
