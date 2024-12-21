@@ -72,7 +72,7 @@ class ApartmentBase(BaseModel):
 
 class ApartmentCreate(ApartmentBase):
     crm_id: str = Field(None, max_length=255, description="The CRM ID of the apartment")
-    responsible: Optional[str] = Field(None, min_length=3, max_length=100)
+    responsible: Optional[str] = Field(None, max_length=100)
 
 
 class ApartmentUpdate(ApartmentBase):
