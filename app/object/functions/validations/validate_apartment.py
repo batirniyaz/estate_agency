@@ -55,8 +55,9 @@ async def validate_apartment(db, apartment):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object phone must start with +")
 
     if apartment.agent_percent:
-        if 0 >= apartment.agent_percent > 100:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be greater than 0")
+        if not 0 >= apartment.agent_percent > 100:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Object agent_percent must be between 0 and 100")
 
         if not apartment.agent_percent.is_integer():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be integer")

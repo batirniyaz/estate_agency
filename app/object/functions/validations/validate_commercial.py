@@ -37,7 +37,7 @@ async def validate_commercial(db, commercial):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object floor_number must be integer")
 
     if commercial.agent_percent:
-        if 0 >= commercial.agent_percent > 100:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be greater than 0")
+        if not 0 >= commercial.agent_percent > 100:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be between 0 and 100")
         elif not commercial.agent_percent.is_integer():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object agent_percent must be integer")
