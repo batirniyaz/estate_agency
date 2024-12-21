@@ -24,9 +24,6 @@ async def create_land(
         media: Optional[List[UploadFile]] = None,
         background_tasks: BackgroundTasks = None,
 ):
-    if land.current_status != CurrentStatus.FREE and not land.status_date:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Status date is required if status is not free")
 
     await validate_land(db, land)
 
@@ -113,16 +110,12 @@ async def update_land(
         user,
         media: Optional[List[UploadFile]] = None
 ):
-    if land.current_status:
-        if land.current_status != CurrentStatus.FREE and not land.status_date:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Status date is required if status is not free")
 
     db_land = await get_land(db, land_id)
     if user.full_name != db_land.responsible and not user.is_superuser:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
 
-    if land.current_status == CurrentStatus.BUSY:
+    if land.deal:
         if not user.is_superuser:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This commercial is busy. Not allowed to update')
 

@@ -28,10 +28,6 @@ async def create_apartment(
 
     await validate_apartment(db, apartment)
 
-    if apartment.current_status != CurrentStatus.FREE and not apartment.status_date:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Status date is required if status is not free")
-
     try:
 
         apartment.crm_id = await generate_crm_id(db, Apartment, 'A')
@@ -113,16 +109,12 @@ async def update_apartment(
         user,
         media: Optional[List[UploadFile]] = None
 ):
-    if apartment.current_status:
-        if apartment.current_status != CurrentStatus.FREE and not apartment.status_date:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Status date is required if status is not free")
 
     db_apartment = await get_apartment(db, apartment_id)
     if not user.is_superuser and user.full_name != db_apartment.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='This object created by another agent')
 
-    if db_apartment.current_status == CurrentStatus.BUSY:
+    if db_apartment.deal:
         if not user.is_superuser:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This apartment is busy. Not allowed to update')
 

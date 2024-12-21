@@ -26,10 +26,6 @@ async def create_commercial(
         background_tasks: BackgroundTasks = None
 ):
 
-    if commercial.current_status != CurrentStatus.FREE and not commercial.status_date:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Status date is required if status is not free")
-
     await validate_commercial(db, commercial)
 
     try:
@@ -117,10 +113,6 @@ async def update_commercial(
         user,
         media: Optional[List[UploadFile]] = None
 ):
-    if commercial.current_status:
-        if commercial.current_status != CurrentStatus.FREE and not commercial.status_date:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Status date is required if status is not free")
 
     db_commercial = await get_commercial(db, commercial_id)
     print(db_commercial)
@@ -128,7 +120,7 @@ async def update_commercial(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not allowed to update this commercial")
 
-    if db_commercial.current_status == CurrentStatus.BUSY:
+    if db_commercial.deal:
         if not user.is_superuser:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This commercial is busy. Not allowed to update')
 
