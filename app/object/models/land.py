@@ -63,6 +63,7 @@ class Land(Base):
     second_agent_percent: Mapped[int] = mapped_column(Integer, nullable=True)
     agent_commission: Mapped[float] = mapped_column(Float, nullable=True)
     second_agent_commission: Mapped[float] = mapped_column(Float, nullable=True)
+    deal: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
