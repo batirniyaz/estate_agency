@@ -11,6 +11,7 @@ from sqlalchemy.future import select
 from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id, house_condition_translation, bathroom_translation
 from app.object.functions.validations.validate_media import validate_media
+from app.object.models import CurrentStatus
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.schemas.apartment import ApartmentCreate, ApartmentUpdate, ApartmentResponse
 from app.utils.file_utils import save_upload_file
@@ -27,6 +28,10 @@ async def create_apartment(
 
     await validate_apartment(db, apartment)
 
+    if apartment.current_status != CurrentStatus.FREE and not apartment.status_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Status date is required if status is not free")
+
     try:
 
         apartment.crm_id = await generate_crm_id(db, Apartment, 'A')
@@ -34,6 +39,10 @@ async def create_apartment(
         apartment.agent_commission = apartment.agent_percent * apartment.price / 100
         if apartment.second_responsible and apartment.second_agent_percent:
             apartment.second_agent_commission = apartment.second_agent_percent * apartment.price / 100
+
+        if apartment.current_status == CurrentStatus.FREE:
+            apartment.status_date = None
+
         db_apartment = Apartment(**apartment.model_dump())
         db.add(db_apartment)
         await db.commit()
@@ -104,10 +113,18 @@ async def update_apartment(
         user,
         media: Optional[List[UploadFile]] = None
 ):
+    if apartment.current_status:
+        if apartment.current_status != CurrentStatus.FREE and not apartment.status_date:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Status date is required if status is not free")
+
     db_apartment = await get_apartment(db, apartment_id)
-    print(user.is_superuser)
     if not user.is_superuser and user.full_name != db_apartment.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='This object created by another agent')
+
+    if db_apartment.current_status == CurrentStatus.BUSY:
+        if not user.is_superuser:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This apartment is busy. Not allowed to update')
 
     await validate_apartment(db, apartment)
     try:
@@ -116,6 +133,9 @@ async def update_apartment(
 
         if apartment.second_responsible and apartment.second_agent_percent and apartment.price:
             apartment.second_agent_commission = apartment.second_agent_percent * apartment.price / 100
+
+        if apartment.current_status == CurrentStatus.FREE:
+            apartment.status_date = None
 
         if media and len(media) > 0:
             if not media[0].filename == '':

@@ -11,6 +11,7 @@ from sqlalchemy.future import select
 from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id, house_condition_translation
 from app.object.functions.validations.validate_media import validate_media
+from app.object.models import CurrentStatus
 from app.object.models.commercial import CommercialMedia, Commercial
 from app.object.schemas.commercial import CommercialCreate, CommercialResponse, CommercialUpdate
 from app.utils.file_utils import save_upload_file
@@ -25,6 +26,10 @@ async def create_commercial(
         background_tasks: BackgroundTasks = None
 ):
 
+    if commercial.current_status != CurrentStatus.FREE and not commercial.status_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Status date is required if status is not free")
+
     await validate_commercial(db, commercial)
 
     try:
@@ -34,6 +39,9 @@ async def create_commercial(
         commercial.agent_commission = commercial.agent_percent * commercial.price / 100
         if commercial.second_responsible and commercial.second_agent_percent:
             commercial.second_agent_commission = commercial.second_agent_percent * commercial.price / 100
+
+        if commercial.current_status == CurrentStatus.FREE:
+            commercial.status_date = None
 
         db_commercial = Commercial(**commercial.model_dump())
         db.add(db_commercial)
@@ -109,11 +117,21 @@ async def update_commercial(
         user,
         media: Optional[List[UploadFile]] = None
 ):
+    if commercial.current_status:
+        if commercial.current_status != CurrentStatus.FREE and not commercial.status_date:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Status date is required if status is not free")
+
     db_commercial = await get_commercial(db, commercial_id)
     print(db_commercial)
     if not user.is_superuser and user.full_name != db_commercial.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not allowed to update this commercial")
+
+    if db_commercial.current_status == CurrentStatus.BUSY:
+        if not user.is_superuser:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This commercial is busy. Not allowed to update')
+
 
     await validate_commercial(db, commercial)
 
@@ -123,6 +141,9 @@ async def update_commercial(
 
         if commercial.second_responsible and commercial.second_agent_percent and commercial.price:
             commercial.second_agent_commission = commercial.second_agent_percent * commercial.price / 100
+
+        if commercial.current_status == CurrentStatus.FREE:
+            commercial.status_date = None
 
         if media and len(media) > 0:
             if not media[0].filename == '':

@@ -11,6 +11,7 @@ from sqlalchemy.future import select
 from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id, house_condition_translation
 from app.object.functions.validations.validate_media import validate_media
+from app.object.models import CurrentStatus
 from app.object.models.land import LandMedia, Land
 from app.object.schemas.land import LandCreate, LandResponse, LandUpdate
 from app.utils.file_utils import save_upload_file
@@ -23,6 +24,9 @@ async def create_land(
         media: Optional[List[UploadFile]] = None,
         background_tasks: BackgroundTasks = None,
 ):
+    if land.current_status != CurrentStatus.FREE and not land.status_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Status date is required if status is not free")
 
     await validate_land(db, land)
 
@@ -33,6 +37,9 @@ async def create_land(
         land.agent_commission = land.agent_percent * land.price / 100
         if land.second_responsible and land.second_agent_percent:
             land.second_agent_commission = land.second_agent_percent * land.price / 100
+
+        if land.current_status == CurrentStatus.FREE:
+            land.status_date = None
 
         db_land = Land(**land.model_dump())
         db.add(db_land)
@@ -106,9 +113,19 @@ async def update_land(
         user,
         media: Optional[List[UploadFile]] = None
 ):
+    if land.current_status:
+        if land.current_status != CurrentStatus.FREE and not land.status_date:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Status date is required if status is not free")
+
     db_land = await get_land(db, land_id)
     if user.full_name != db_land.responsible and not user.is_superuser:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
+
+    if land.current_status == CurrentStatus.BUSY:
+        if not user.is_superuser:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This commercial is busy. Not allowed to update')
+
 
     await validate_land(db, land)
     try:
@@ -117,6 +134,10 @@ async def update_land(
             land.agent_commission = land.agent_percent * land.price / 100
         if land.second_agent_percent and land.price and land.second_responsible:
             land.second_agent_commission = land.second_agent_percent * land.price / 100
+
+        if land.current_status == CurrentStatus.FREE:
+            land.status_date = None
+
 
         if media and len(media) > 0:
             if not media[0].filename == '':
