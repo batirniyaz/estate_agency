@@ -16,6 +16,8 @@ from app.object.models.commercial import Commercial, CommercialMedia
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition, LocationCommercial, \
     LocationLand, CurrentStatus
 from app.changes.model import ChangeLog, OperationType
+from app.report.clients.model import Client
+from app.report.views.model import View
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
