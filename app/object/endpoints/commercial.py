@@ -36,7 +36,7 @@ async def get_commercials_endpoint(
     return await get_commercials(db, limit, page)
 
 
-@router.get("/{commercial_id}", response_model=CommercialResponse)
+@router.get("/{commercial_id}")
 async def get_commercial_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                   db: Annotated[AsyncSession, Depends(get_async_session)],
                                   commercial_id: int):

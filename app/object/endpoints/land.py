@@ -33,7 +33,7 @@ async def get_lands_endpoint(
     return await get_lands(db, limit, page)
 
 
-@router.get("/{land_id}", response_model=LandResponse)
+@router.get("/{land_id}")
 async def get_land_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                             db: Annotated[AsyncSession, Depends(get_async_session)],
                             land_id: int):
