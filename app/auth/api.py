@@ -73,9 +73,9 @@ async def get_users_endpoint(
         db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
+        # if not current_user.is_superuser:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
         return await get_users(db)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
