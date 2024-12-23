@@ -151,22 +151,34 @@ async def get_user_by_id(db: AsyncSession, user_id: int):
     return user
 
 
+async def get_user_by_email(db: AsyncSession, user_email: str):
+    res = await db.execute(select(User).filter_by(email=user_email))
+    user = res.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return user
+
+
 async def update_user(db: AsyncSession, user_id: int, user: UserUpdate):
+    res_phone = await db.execute(select(User).filter_by(phone=user.phone))
+    user_phone = res_phone.scalars().first()
+    if user_phone:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this phone')
+
+    res_email = await db.execute(select(User).filter_by(email=user.email))
+    user_email = res_email.scalars().first()
+    if user_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this email')
+
+    user_db = await get_user_by_id(db, user_id)
+
     try:
-        res_phone = await db.execute(select(User).filter_by(phone=user.phone))
-        user_phone = res_phone.scalars().first()
-        if user_phone:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this phone')
+        if user.hashed_password:
+            hashed_pass = get_password_hash(user.hashed_password)
+            user.hashed_password = hashed_pass
 
-        res_email = await db.execute(select(User).filter_by(email=user.email))
-        user_email = res_email.scalars().first()
-        if user_email:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this email')
-
-        user_db = await get_user_by_id(db, user_id)
-        hashed_pass = get_password_hash(user.hashed_password)
-
-        user.hashed_password = hashed_pass
         for key, value in user.model_dump(exclude_unset=True).items():
             setattr(user_db, key, value)
 
