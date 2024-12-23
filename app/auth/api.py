@@ -8,11 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.schema import Token, UserRead, UserCreate, UserUpdate
 from app.auth.utils import CustomOAuth2PasswordRequestForm, authenticate_user, create_access_token, \
     get_current_active_user, create_user, blacklist_token, log_login_info, get_login_info, get_users, get_user_by_id, \
-    update_user, delete_user, read_me
+    update_user, delete_user, read_me, get_user_by_email
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_async_session
 from user_agents import parse
 
+from .forgot_pass import forgot_password
 from .utils import oauth2_scheme
 
 router = APIRouter()
@@ -103,13 +104,10 @@ async def update_user_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update users")
-        return await update_user(db, user_id, user)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update users")
+    return await update_user(db, user_id, user)
 
 
 @router_user.delete('/{user_id}')
@@ -144,3 +142,18 @@ async def get_login_info_endpoint(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view login info")
     return await get_login_info(db)
+
+
+@router.post("/forgot_password/")
+async def forgot_password_endpoint(
+        email: str,
+        db: Annotated[AsyncSession, Depends(get_async_session)],
+        code: str = None
+):
+    print('I am in route')
+    user = await get_user_by_email(db, email)
+    if not user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to reset password")
+
+    return await forgot_password(db, email, code if code else None)
