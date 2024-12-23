@@ -16,7 +16,7 @@ class Deal(Base):
     date: Mapped[str] = mapped_column(String(10))
     crm_id: Mapped[str] = mapped_column(String)
     object_price: Mapped[int] = mapped_column(Integer)
-    commission: Mapped[int] = mapped_column(Integer)
+    commission: Mapped[float] = mapped_column(Integer)
     agent_percent: Mapped[int] = mapped_column(Integer)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
