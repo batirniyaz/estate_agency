@@ -14,6 +14,7 @@ from app.object.functions.validations.validate_media import validate_media
 from app.object.models import CurrentStatus
 from app.object.models.commercial import CommercialMedia, Commercial
 from app.object.schemas.commercial import CommercialCreate, CommercialResponse, CommercialUpdate
+from app.report.deals.crud import create_deal
 from app.utils.file_utils import save_upload_file
 
 from app.object.functions.validations.validate_commercial import validate_commercial
@@ -111,7 +112,8 @@ async def update_commercial(
         commercial_id: int,
         commercial: CommercialUpdate,
         user,
-        media: Optional[List[UploadFile]] = None
+        media: Optional[List[UploadFile]] = None,
+        background_tasks: BackgroundTasks = None
 ):
 
     db_commercial = await get_commercial(db, commercial_id)
@@ -158,6 +160,12 @@ async def update_commercial(
 
         await db.commit()
         await db.refresh(db_commercial)
+
+        if commercial.deal:
+            background_tasks.add_task(create_deal, db, db_commercial.action_type, db_commercial.responsible,
+                                      db_commercial.updated_at.strftime('%Y-%m-%d'), db_commercial.crm_id, db_commercial.price,
+                                      db_commercial.agent_commission, db_commercial.agent_percent)
+
 
         commercial_response = CommercialResponse.model_validate(db_commercial)
         return jsonable_encoder(commercial_response)

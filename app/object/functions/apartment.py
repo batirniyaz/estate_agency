@@ -14,6 +14,7 @@ from app.object.functions.validations.validate_media import validate_media
 from app.object.models import CurrentStatus
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.schemas.apartment import ApartmentCreate, ApartmentUpdate, ApartmentResponse
+from app.report.deals.crud import create_deal
 from app.utils.file_utils import save_upload_file
 
 from app.object.functions.validations.validate_apartment import validate_apartment
@@ -107,7 +108,8 @@ async def update_apartment(
         apartment_id: int,
         apartment: ApartmentUpdate,
         user,
-        media: Optional[List[UploadFile]] = None
+        media: Optional[List[UploadFile]] = None,
+        background_tasks: BackgroundTasks = None
 ):
 
     db_apartment = await get_apartment(db, apartment_id)
@@ -150,6 +152,11 @@ async def update_apartment(
 
         await db.commit()
         await db.refresh(db_apartment)
+
+        if apartment.deal:
+            background_tasks.add_task(create_deal, db, db_apartment.action_type, db_apartment.responsible,
+                                      db_apartment.updated_at.strftime('%Y-%m-%d'), db_apartment.crm_id, db_apartment.price,
+                                      db_apartment.agent_commission, db_apartment.agent_percent)
 
         apartment_response = ApartmentResponse.model_validate(db_apartment)
         return jsonable_encoder(apartment_response)
