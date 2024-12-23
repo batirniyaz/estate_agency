@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 
 from app.report.validations.view_validate import validate_view
 from app.report.views.model import View
-from app.report.views.schema import ViewCreate, ViewUpdate, ViewResponse
+from app.report.views.schema import ViewCreate, ViewUpdate
 
 
 async def create_view(db: AsyncSession, view: ViewCreate):
