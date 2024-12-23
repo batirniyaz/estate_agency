@@ -33,3 +33,11 @@ class LoginInfo(Base):
     phone: Mapped[str] = mapped_column(String(length=13))
     login_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                         default=lambda: datetime.datetime.now(datetime.timezone.utc))
+
+
+class PasswordReset(Base):
+    __tablename__ = 'password_reset'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    reset_code: Mapped[str] = mapped_column(String(length=6))
+    email: Mapped[str] = mapped_column(String(length=255))
