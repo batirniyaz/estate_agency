@@ -22,3 +22,7 @@ CHANNEL_ID = os.getenv("CHANNEL_ID")
 ADMIN_ID = os.getenv("ADMIN_ID")
 
 BASE_URL = os.getenv('MY_URL')
+
+# Notf sending
+SENDER_MAIL = os.getenv("SENDER_MAIL")
+SENDER_PASS = os.getenv("SENDER_PASS")
