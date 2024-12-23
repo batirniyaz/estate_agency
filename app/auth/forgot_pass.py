@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.auth.model import PasswordReset
+from app.auth.utils import get_user_by_email, get_password_hash
 from app.config import SENDER_MAIL, SENDER_PASS
 import random
 
@@ -70,17 +71,27 @@ async def verify_reset_code(db: AsyncSession, code: str):
     return True if reset_code else False
 
 
-async def forgot_password(db: AsyncSession, email: str, code: str = None):
+async def reset_password(db: AsyncSession, email: str, new_password: str):
+    user = await get_user_by_email(db, email)
+    hashed_pass = get_password_hash(new_password)
+    user.hashed_password = hashed_pass
+    await db.commit()
+
+
+async def forgot_password(db: AsyncSession, email: str, code: str = None, new_password: str = None):
     print('I am in forgot pass')
 
-    if not code:
+    if not code and not new_password and email:
         reset_code = generate_reset_code()
         await send_email(email, "Reset Password", f"Your reset code is: {reset_code}")
         await storage_reset_code(db, email, reset_code)
         return {"detail": "Reset code sent to your email"}
-    else:
+    if code and email and not new_password:
         await verify_reset_code(db, code)
         await delete_reset_code(db, email)
+        return {"detail": "Reset code successfully verified"}
+    if new_password and email and not code:
+        await reset_password(db, email, new_password)
         return {"detail": "Password reset successfully"}
 
 
