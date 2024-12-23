@@ -148,7 +148,8 @@ async def get_login_info_endpoint(
 async def forgot_password_endpoint(
         email: str,
         db: Annotated[AsyncSession, Depends(get_async_session)],
-        code: str = None
+        code: str = None,
+        new_password: str = None
 ):
     print('I am in route')
     user = await get_user_by_email(db, email)
@@ -156,4 +157,5 @@ async def forgot_password_endpoint(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to reset password")
 
-    return await forgot_password(db, email, code if code else None)
+    return await forgot_password(db=db, email=email, code=code if code else None,
+                                 new_password=new_password if new_password else None)
