@@ -1,3 +1,4 @@
+from codecs import backslashreplace_errors
 from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Query, BackgroundTasks
@@ -43,12 +44,14 @@ async def get_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_c
 @router.put("/{apartment_id}")
 async def update_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                     db: Annotated[AsyncSession, Depends(get_async_session)],
+                                    background_tasks: BackgroundTasks,
                                     apartment_id: int, apartment: ApartmentUpdate = Query(...),
                                     media: Optional[List[UploadFile]] = File(None)):
     return await update_apartment(
         db=db, apartment_id=apartment_id,
         apartment=apartment, user=current_user,
-        media=media if media else None)
+        media=media if media else None,
+        background_tasks=background_tasks)
 
 
 @router.delete("/{apartment_id}")
