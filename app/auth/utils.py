@@ -146,7 +146,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int):
     user = res.scalars().first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with id not found")
 
     return user
 
@@ -156,7 +156,7 @@ async def get_user_by_email(db: AsyncSession, user_email: str):
     user = res.scalars().first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with email not found")
 
     return user
 
