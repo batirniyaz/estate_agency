@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey, Float
+from sqlalchemy import Integer, String, TIMESTAMP, Boolean, Enum, ForeignKey, Float, BigInteger
 
 from app.database import Base
 
@@ -11,7 +11,7 @@ from app.object.models import Category, ActionType, HouseType, BathroomType, Hou
 class ApartmentMedia(Base):
     __tablename__ = 'apartment_media'
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     url: Mapped[str] = mapped_column(String)
     media_type: Mapped[str] = mapped_column(String, nullable=True)
     apartment_id: Mapped[int] = mapped_column(Integer, ForeignKey('apartment.id'))
@@ -34,7 +34,7 @@ class Apartment(Base):
 
     # Location of the apartment
     district: Mapped[str] = mapped_column(String(length=255))
-    metro_st: Mapped[str] = mapped_column(String(length=255))
+    metro_st: Mapped[str] = mapped_column(String(length=255), nullable=True)
 
     # Details of the apartment
     title: Mapped[str] = mapped_column(String(length=255))
