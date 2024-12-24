@@ -43,12 +43,12 @@ async def get_district(db: AsyncSession, district_id: int):
 
 
 async def update_district(db: AsyncSession, district_id: int, district: DistrictUpdate):
-    try:
-        db_district = await get_district(db, district_id)
+    db_district = await get_district(db, district_id)
+    db_districts = await get_districts(db)
+    if district.name in [d.name for d in db_districts]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="District already exists")
 
-        db_districts = await get_districts(db)
-        if district.name in [d.name for d in db_districts]:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="District already exists")
+    try:
 
         for key, value in district.model_dump(exclude_unset=True).items():
             setattr(db_district, key, value)
