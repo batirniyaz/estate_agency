@@ -33,7 +33,7 @@ class ApartmentMediaResponse(BaseModel):
 class ApartmentBase(BaseModel):
     district: str = Field(..., description="The district name of the apartment",
                           examples=["Yunusabad"])
-    metro_st: str = Field(..., description="The name of the nearest metro station",
+    metro_st: Optional[str] = Field(None, description="The name of the nearest metro station",
                           examples=["Buyuk Ipak Yuli"])
     title: str = Field(..., min_length=3, max_length=50, description="The title of the apartment",
                        examples=["Apartment for sale"])
