@@ -191,9 +191,13 @@ async def update_user(db: AsyncSession, user_id: int, user: UserUpdate):
 
 async def delete_user(db: AsyncSession, user_id: int):
     user = await get_user_by_id(db, user_id)
-    await db.delete(user)
-    await db.commit()
-    raise HTTPException(status_code=status.HTTP_200_OK, detail="User deleted")
+    try:
+        await db.delete(user)
+        await db.commit()
+        return {"detail": "User deleted successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 async def read_me(current_user, token: Annotated[str, Depends(oauth2_scheme)]):

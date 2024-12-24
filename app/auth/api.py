@@ -116,13 +116,10 @@ async def delete_user_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete users")
-        return await delete_user(db, user_id)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete users")
+    return await delete_user(db, user_id)
 
 
 @router.get("/me/", response_model={})
