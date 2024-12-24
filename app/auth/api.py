@@ -59,13 +59,10 @@ async def register_user(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create users")
-        return await create_user(db, user)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create users")
+    return await create_user(db, user)
 
 
 @router_user.get("/")
@@ -73,13 +70,7 @@ async def get_users_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
-    try:
-        # if not current_user.is_superuser:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
-        return await get_users(db)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return await get_users(db)
 
 
 @router_user.get('/{user_id}')
@@ -88,13 +79,10 @@ async def get_user_by_id_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
         db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
-    try:
-        if not current_user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
-        return await get_user_by_id(db, user_id)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
+    return await get_user_by_id(db, user_id)
 
 
 @router_user.put('/{user_id}')

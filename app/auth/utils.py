@@ -110,6 +110,9 @@ async def get_current_active_user(
 
 
 async def create_user(db: AsyncSession, user: UserCreate):
+    if len(user.phone) > 13 or len(user.phone) < 13:
+        raise HTTPException(status_code=400, detail="Phone number is too long or too short")
+
     try:
         print(user)
         hashed_password = get_password_hash(user.hashed_password)
