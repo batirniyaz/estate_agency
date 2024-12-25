@@ -164,6 +164,16 @@ async def get_user_by_email(db: AsyncSession, user_email: str):
     return user
 
 
+async def get_user_by_name(db: AsyncSession, name: str):
+    res = await db.execute(select(User).filter_by(full_name=name))
+    user = res.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with name not found")
+
+    return user
+
+
 async def update_user(db: AsyncSession, user_id: int, user: UserUpdate):
     res_phone = await db.execute(select(User).filter_by(phone=user.phone))
     user_phone = res_phone.scalars().first()
