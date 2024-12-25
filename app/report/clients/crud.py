@@ -5,6 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.object.models import ActionType
 from app.report.clients.model import Client
 from app.report.clients.schema import ClientCreate, ClientUpdate
 from app.report.validations.client_validate import validate_client
@@ -13,7 +14,7 @@ from app.report.validations.client_validate import validate_client
 async def create_client(db: AsyncSession, client: ClientCreate):
 
     await validate_client(db, client)
-    if client.action_type == 'sale' and not client.deal_status:
+    if client.action_type == ActionType.SALE and not client.deal_status:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус сделки обязателен для продажи")
     else:
         client.deal_status = None
@@ -31,7 +32,7 @@ async def create_client(db: AsyncSession, client: ClientCreate):
 
 
 async def get_clients(db: AsyncSession, limit: int = 10, page: int = 1):
-    res = await db.execute(select(Client).limit(limit).offset((page - 1) * limit))
+    res = await db.execute(select(Client).limit(limit).offset((page - 1) * limit).order_by(Client.id.desc()))
     clients = res.scalars().all()
     total_count = await db.scalar(select(func.count(Client.id)))
 
@@ -50,7 +51,13 @@ async def get_client(db: AsyncSession, client_id: int):
 
 async def update_client(db: AsyncSession, client_id: int, client: ClientUpdate):
     await validate_client(db, client)
+
     db_client = await get_client(db, client_id)
+
+    if client.action_type == ActionType.SALE and not client.deal_status:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус сделки обязателен для продажи")
+    else:
+        client.deal_status = None
 
     try:
 
