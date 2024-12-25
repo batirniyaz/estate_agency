@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum, TIMESTAMP
+from sqlalchemy import Integer, String, Enum, TIMESTAMP, Boolean
 from app.object.models import ActionType
 
 from app.database import Base
@@ -13,11 +13,16 @@ class View(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     action_type: Mapped[ActionType] = mapped_column(Enum(ActionType))
     responsible: Mapped[str] = mapped_column(String)
-    date: Mapped[str] = mapped_column(String)
-    object_sum: Mapped[int] = mapped_column(Integer)
-    commission_sum: Mapped[int] = mapped_column(Integer)
+    date: Mapped[str] = mapped_column(String(10), nullable=True)
+    time: Mapped[str] = mapped_column(String(5), nullable=True)
+    district: Mapped[str] = mapped_column(String, nullable=True)
+    price: Mapped[int] = mapped_column(Integer, nullable=True)
+    commission: Mapped[int] = mapped_column(Integer, nullable=True)
     agent_percent: Mapped[int] = mapped_column(Integer)
+    status_deal: Mapped[bool] = mapped_column(Boolean, nullable=True)
     crm_id: Mapped[str] = mapped_column(String)
+    client_number: Mapped[str] = mapped_column(String(13), nullable=True)
+    owner_number: Mapped[str] = mapped_column(String(13), nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
