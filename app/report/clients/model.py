@@ -33,7 +33,7 @@ class Client(Base):
     budget: Mapped[int] = mapped_column(Integer, nullable=True)
     comment: Mapped[str] = mapped_column(String, nullable=True)
     client_status: Mapped[ClientStatus] = mapped_column(Enum(ClientStatus), nullable=True)
-    deal_status: Mapped[DealStatus] = mapped_column(Enum(DealStatus), default=DealStatus.INITIAL_CONTACT, nullable=True)
+    deal_status: Mapped[DealStatus] = mapped_column(Enum(DealStatus), nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True),
                                                           default=lambda: datetime.datetime.now(datetime.timezone.utc))
