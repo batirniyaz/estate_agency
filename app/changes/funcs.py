@@ -4,6 +4,7 @@ from typing import Type
 from datetime import datetime
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.event import listens_for
@@ -124,6 +125,8 @@ async def get_changes_log(db, limit: int = 10, page: int = 1):
         result = await db.execute(select(ChangeLog).limit(limit).offset((page - 1) * limit).order_by(ChangeLog.created_at.desc()))
         changes = result.scalars().all()
 
-        return changes if changes else []
+        total_count = await db.scalar(select(func.count(ChangeLog.id)))
+
+        return {"data": changes if changes else [], "total_count": total_count}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

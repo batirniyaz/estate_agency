@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 from typing import Annotated, Set
 import pytz
+from sqlalchemy import func
 
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
@@ -238,7 +239,9 @@ async def get_login_info(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
         res = await db.execute(select(LoginInfo).limit(limit).offset((page - 1) * limit).order_by(LoginInfo.id.desc()))
         login_info = res.scalars().all()
-        return login_info or []
+
+        total_count = await db.scalar(select(func.count(LoginInfo.id)))
+        return {"data": login_info or [], "total_count": total_count}
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
