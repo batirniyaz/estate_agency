@@ -51,13 +51,19 @@ async def storage_reset_code(db: AsyncSession, email: str, reset_code: str):
     await db.commit()
 
 
-async def delete_reset_code(db: AsyncSession, email: str):
-    email_code = await db.execute(select(PasswordReset).filter_by(email=email))
-    email_code = email_code.scalars().first()
-    if not email_code:
+async def delete_reset_code(db: AsyncSession, code: str):
+    reset_code = await db.execute(select(PasswordReset).filter_by(reset_code=code))
+    reset_code = reset_code.scalars().first()
+    if not reset_code:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reset code not found")
 
-    await db.delete(email_code)
+    await db.delete(reset_code)
+
+    email = await db.execute(select(PasswordReset).filter_by(email=reset_code.email))
+    email = email.scalars().all()
+    for e in email:
+        await db.delete(e)
+
     await db.commit()
 
 
@@ -79,7 +85,6 @@ async def reset_password(db: AsyncSession, email: str, new_password: str):
 
 
 async def forgot_password(db: AsyncSession, email: str, code: str = None, new_password: str = None):
-    print('I am in forgot pass')
 
     if not code and not new_password and email:
         reset_code = generate_reset_code()
@@ -88,7 +93,7 @@ async def forgot_password(db: AsyncSession, email: str, code: str = None, new_pa
         return {"detail": "Reset code sent to your email"}
     if code and email and not new_password:
         await verify_reset_code(db, code)
-        await delete_reset_code(db, email)
+        await delete_reset_code(db, code)
         return {"detail": "Reset code successfully verified"}
     if new_password and email and not code:
         await reset_password(db, email, new_password)
