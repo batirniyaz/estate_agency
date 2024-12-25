@@ -18,7 +18,7 @@ class ViewBase(BaseModel):
     @field_validator('date')
     def date_not_in_past(cls, v):
         if datetime.date.fromisoformat(v) < datetime.date.today():
-            raise ValueError('Date cannot be in the past')
+            raise ValueError('Время просмотра не может быть в прошлом')
         return v
 
 

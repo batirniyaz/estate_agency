@@ -18,7 +18,7 @@ async def create_metro(db: AsyncSession, metro: MetroCreate):
     except IntegrityError as e:
         await db.rollback()
         if "duplicate key value violates unique constraint" in str(e):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Metro already exists")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Метро с таким именем уже существует")
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     except Exception as e:
@@ -37,7 +37,7 @@ async def get_metro(db: AsyncSession, metro_id: int):
     db_metro = db_metro.scalar_one_or_none()
 
     if not db_metro:
-        raise HTTPException(status_code=404, detail="Metro not found")
+        raise HTTPException(status_code=404, detail="Метро не найдено")
 
     return db_metro
 
@@ -47,7 +47,7 @@ async def update_metro(db: AsyncSession, metro_id: int, metro: MetroUpdate):
     db_metro = await get_metro(db, metro_id)
     db_metros = await get_metros(db)
     if metro.name in [d.name for d in db_metros]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Metro already exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Метро с таким именем уже существует")
 
     try:
 
@@ -66,4 +66,4 @@ async def delete_metro(db: AsyncSession, metro_id: int):
     db_metro = await get_metro(db, metro_id)
     await db.delete(db_metro)
     await db.commit()
-    return HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Metro deleted successfully")
+    return HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Метро успешно удалено")

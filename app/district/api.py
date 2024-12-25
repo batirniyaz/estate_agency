@@ -20,7 +20,7 @@ async def create_district_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create districts")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Вы не имеете права создавать район")
     return await create_district(db, district)
 
 
@@ -50,7 +50,7 @@ async def update_district_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update districts")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на обновление района")
     return await update_district(db, district_id, district)
 
 
@@ -62,5 +62,5 @@ async def delete_district_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete districts")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на удаление района")
     return await delete_district(db, district_id)

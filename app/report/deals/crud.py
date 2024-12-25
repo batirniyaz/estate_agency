@@ -45,7 +45,7 @@ async def get_deal(db: AsyncSession, deal_id: int):
     deal = res.scalars().first()
 
     if not deal:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deal not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Сделка не найдена")
 
     return deal
 
@@ -54,4 +54,4 @@ async def delete_deal(db: AsyncSession, deal_id: int):
     deal = await get_deal(db, deal_id)
     await db.delete(deal)
     await db.commit()
-    return {"message": "Deal deleted successfully"}
+    return {"message": "Сделка удалена"}

@@ -40,7 +40,7 @@ async def get_client(db: AsyncSession, client_id: int):
     client = res.scalars().first()
 
     if not client:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Клиент не найден")
 
     return client
 
@@ -67,7 +67,7 @@ async def delete_client(db: AsyncSession, client_id: int):
         db_client = await get_client(db, client_id)
         await db.delete(db_client)
         await db.commit()
-        return {"message": "Client deleted successfully"}
+        return {"message": "Клиент успешно удален"}
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

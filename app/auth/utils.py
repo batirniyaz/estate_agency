@@ -82,7 +82,7 @@ async def get_current_user(
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Не удалось проверить учетные данные",
         headers={"WWW-Authenticate": "Bearer"},
     )
     if is_token_blacklisted(token):
@@ -105,13 +105,13 @@ async def get_current_active_user(
     current_user: Annotated[UserRead, Depends(get_current_user)],
 ):
     if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="Неактивный пользователь")
     return current_user
 
 
 async def create_user(db: AsyncSession, user: UserCreate):
     if len(user.phone) > 13 or len(user.phone) < 13:
-        raise HTTPException(status_code=400, detail="Phone number is too long or too short")
+        raise HTTPException(status_code=400, detail="Номер телефона слишком длинный или слишком короткий")
 
     try:
         print(user)
@@ -131,7 +131,7 @@ async def create_user(db: AsyncSession, user: UserCreate):
     except IntegrityError as e:
         await db.rollback()
         if "unique constraint" in str(e.orig):
-            raise HTTPException(status_code=400, detail="User phone or email already exists")
+            raise HTTPException(status_code=400, detail="Телефон или адрес электронной почты пользователя уже существует")
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         await db.rollback()
@@ -149,7 +149,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int):
     user = res.scalars().first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with id not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь с идентификатором не найден")
 
     return user
 
@@ -159,7 +159,7 @@ async def get_user_by_email(db: AsyncSession, user_email: str):
     user = res.scalars().first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with email not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь с адресом электронной почты не найден")
 
     return user
 
@@ -169,7 +169,7 @@ async def get_user_by_name(db: AsyncSession, name: str):
     user = res.scalars().first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with name not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь с именем не найден")
 
     return user
 
@@ -178,12 +178,12 @@ async def update_user(db: AsyncSession, user_id: int, user: UserUpdate):
     res_phone = await db.execute(select(User).filter_by(phone=user.phone))
     user_phone = res_phone.scalars().first()
     if user_phone:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this phone')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Пользователь с таким телефоном уже существует')
 
     res_email = await db.execute(select(User).filter_by(email=user.email))
     user_email = res_email.scalars().first()
     if user_email:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Already exists user with this email')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Пользователь с таким адресом электронной почты уже существует')
 
     user_db = await get_user_by_id(db, user_id)
 
@@ -207,7 +207,7 @@ async def delete_user(db: AsyncSession, user_id: int):
     try:
         await db.delete(user)
         await db.commit()
-        return {"detail": "User deleted successfully"}
+        return {"detail": "Пользователь успешно удален"}
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

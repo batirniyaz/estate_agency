@@ -30,7 +30,7 @@ async def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect phone number or password",
+            detail="Неправильный номер телефона или пароль",
             headers={"WWW-Authenticate": "Bearer"},
         )
     await log_login_info(db, user.id, user.email, user.phone)
@@ -47,7 +47,7 @@ async def logout(
         token: Annotated[str, Depends(oauth2_scheme)],
 ):
     blacklist_token(token)
-    return {"msg": "Successfully logged out"}
+    return {"msg": "Успешно вышли из системы"}
 
 
 router_user = APIRouter()
@@ -61,7 +61,7 @@ async def register_user(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create users")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на создание пользователей")
     return await create_user(db, user)
 
 
@@ -81,7 +81,7 @@ async def get_user_by_id_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view users")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на просмотр пользователей")
     return await get_user_by_id(db, user_id)
 
 
@@ -94,7 +94,7 @@ async def update_user_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update users")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на обновление пользователей")
     return await update_user(db, user_id, user)
 
 
@@ -106,7 +106,7 @@ async def delete_user_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete users")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на удаление пользователей")
     return await delete_user(db, user_id)
 
 
@@ -136,11 +136,10 @@ async def forgot_password_endpoint(
         code: str = None,
         new_password: str = None
 ):
-    print('I am in route')
     user = await get_user_by_email(db, email)
     if not user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to reset password")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на сброс пароля")
 
     return await forgot_password(db=db, email=email, code=code if code else None,
                                  new_password=new_password if new_password else None)

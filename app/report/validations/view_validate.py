@@ -14,19 +14,19 @@ async def validate_view(db: AsyncSession, view: ViewCreate):
     if view.responsible:
         agents = await get_users(db)
         if view.responsible not in [agent.full_name for agent in agents]:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Responsible agent not found")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ответственный агент не найден")
 
     if view.object_sum or view.commission_sum:
         if view.object_sum < 0 or view.commission_sum < 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object sum or agent commission can't be negative")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Сумма комиссии и стоимость объекта не могут быть отрицательными")
 
     if view.agent_percent:
         if view.agent_percent > 100 or view.agent_percent < 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Agent percent must be between 0 and 100")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Процент агента должен быть в пределах от 0 до 100")
 
     if view.crm_id:
         if len(view.crm_id) < 2 or view.crm_id[0] not in ['A', 'C', 'L']:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid CRM ID format")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Неверный формат crm id")
 
         table_mapping = {
             'A': Apartment,
@@ -37,5 +37,5 @@ async def validate_view(db: AsyncSession, view: ViewCreate):
         res = await db.execute(select(table_obj).filter_by(id=int(view.crm_id[1:])))
         obj = res.scalars().first()
         if not obj:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Object with this crm id not found")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Объект не найден")
 

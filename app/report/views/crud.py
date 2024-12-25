@@ -36,7 +36,7 @@ async def get_view(db: AsyncSession, view_id: int):
     view = res.scalars().first()
 
     if not view:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="View not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Показ не найден")
 
     return view
 
@@ -63,7 +63,7 @@ async def delete_view(db: AsyncSession, view_id: int):
         db_view = await get_view(db, view_id)
         await db.delete(db_view)
         await db.commit()
-        return {"message": "View deleted successfully"}
+        return {"message": "Показ удален"}
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

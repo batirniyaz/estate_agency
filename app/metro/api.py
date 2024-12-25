@@ -20,7 +20,7 @@ async def create_metro_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to create metros")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на создание метро")
     return await create_metro(db, metro)
 
 
@@ -50,7 +50,7 @@ async def update_metro_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to update metros")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на обновление метро")
     return await update_metro(db, metro_id, metro)
 
 
@@ -62,5 +62,5 @@ async def delete_metro_endpoint(
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to delete metros")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на удаление метро")
     return await delete_metro(db, metro_id)

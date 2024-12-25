@@ -18,7 +18,7 @@ async def create_district(db: AsyncSession, district: DistrictCreate):
     except IntegrityError as e:
         await db.rollback()
         if "duplicate key value violates unique constraint" in str(e):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="District already exists")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Район с таким именем уже существует")
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     except Exception as e:
@@ -37,7 +37,7 @@ async def get_district(db: AsyncSession, district_id: int):
     db_district = db_district.scalar_one_or_none()
 
     if not db_district:
-        raise HTTPException(status_code=404, detail="District not found")
+        raise HTTPException(status_code=404, detail="Район не найден")
 
     return db_district
 
@@ -46,7 +46,7 @@ async def update_district(db: AsyncSession, district_id: int, district: District
     db_district = await get_district(db, district_id)
     db_districts = await get_districts(db)
     if district.name in [d.name for d in db_districts]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="District already exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Район с таким именем уже существует")
 
     try:
 
@@ -65,4 +65,4 @@ async def delete_district(db: AsyncSession, district_id: int):
     db_district = await get_district(db, district_id)
     await db.delete(db_district)
     await db.commit()
-    return HTTPException(status_code=status.HTTP_200_OK, detail="District deleted")
+    return HTTPException(status_code=status.HTTP_200_OK, detail="Район удален")

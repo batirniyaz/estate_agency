@@ -17,5 +17,5 @@ async def get_changes_log_endpoint(
         page: int = 1,
 ):
     if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can view changes log')
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Только администратор может просматривать журнал изменений')
     return await get_changes_log(db, limit, page)
