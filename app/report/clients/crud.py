@@ -49,10 +49,13 @@ async def get_client(db: AsyncSession, client_id: int):
     return client
 
 
-async def update_client(db: AsyncSession, client_id: int, client: ClientUpdate):
-    await validate_client(db, client)
+async def update_client(db: AsyncSession, client_id: int, client: ClientUpdate, current_user):
 
     db_client = await get_client(db, client_id)
+    if not current_user.is_superuser and db_client.responsible != current_user.full_name:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Вы не можете редактировать этот клиент")
+
+    await validate_client(db, client)
 
     if client.action_type == ActionType.SALE and not client.deal_status:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус сделки обязателен для продажи")
