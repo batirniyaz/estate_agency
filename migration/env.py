@@ -9,14 +9,13 @@ from app.config import DB_USER, DB_PORT, DB_NAME, DB_HOST, DB_PASS
 
 from app.metro.model import Metro
 from app.district.model import District
-from app.auth.model import User
+from app.auth.model import User, PasswordReset
 from app.object.models.land import Land, LandMedia
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.models.commercial import Commercial, CommercialMedia
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition, LocationCommercial, \
     LocationLand, CurrentStatus
 from app.changes.model import ChangeLog, OperationType
-from app.report.clients.model import Client
 from app.report.views.model import View
 from app.report.deals.model import Deal
 
