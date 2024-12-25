@@ -16,6 +16,7 @@ from app.object.models.commercial import Commercial, CommercialMedia
 from app.object.models import Category, ActionType, HouseType, BathroomType, HouseCondition, LocationCommercial, \
     LocationLand, CurrentStatus
 from app.changes.model import ChangeLog, OperationType
+from app.report.clients.model import Client, ClientStatus, DealStatus
 from app.report.views.model import View
 from app.report.deals.model import Deal
 
