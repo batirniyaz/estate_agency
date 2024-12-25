@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum, TIMESTAMP, Boolean
+from sqlalchemy import Integer, String, Enum, TIMESTAMP, Boolean, Float
 from app.object.models import ActionType
 
 from app.database import Base
@@ -17,7 +17,7 @@ class View(Base):
     time: Mapped[str] = mapped_column(String(5))
     district: Mapped[str] = mapped_column(String, nullable=True)
     price: Mapped[int] = mapped_column(Integer)
-    commission: Mapped[int] = mapped_column(Integer)
+    commission: Mapped[float] = mapped_column(Float)
     agent_percent: Mapped[int] = mapped_column(Integer)
     status_deal: Mapped[bool] = mapped_column(Boolean, default=False)
     crm_id: Mapped[str] = mapped_column(String)
