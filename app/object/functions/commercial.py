@@ -58,19 +58,7 @@ async def create_commercial(
         await db.commit()
         await db.refresh(db_commercial)
 
-        message = (f'<b>Сдаётся шикарная коммерция🏡</b>\n\n📍Район: {db_commercial.district}\n'
-                                      f'📍Адрес: {db_commercial.title}\n\n'
-                                      f'🎯{db_commercial.rooms} комн {db_commercial.floor_number}'
-                                      f'\n🎯Площадь: {db_commercial.square_area} м²\n'
-                                      f'🎯{house_condition_translation.get(db_commercial.house_condition.name)}✅\n'
-                                      f'🎯Mебель {"✅" if db_commercial.furnished else "❌"}\n\n'
-                                      f'❗Депозит: Договорная\n'
-                                      f'❗Предоплата: Договорная\n'
-                                      f'💰Цена: {db_commercial.price}$ есть торг\n'
-                                      f'🌀Срм - {db_commercial.crm_id}\n\n'
-                                      f'С уважением {db_commercial.responsible}\n'
-                                      f'Специалист по недвижимости!\n'
-                                      f'Имеется также более 10000 вариантов по всему городу.✅\n')
+
 
         background_tasks.add_task(send_message_to_channel, message, db_commercial.media)
 
@@ -80,10 +68,10 @@ async def create_commercial(
     except IntegrityError as e:
         if 'duplicate key value violates unique constraint' in str(e):
             print(e)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Commercial already exists")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Коммерческий объект с таким номером уже существует")
         raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Произошла ошибка: {str(e)}")
 
 
 async def get_commercials(db: AsyncSession, limit: int = 10, page: int = 1):
@@ -102,7 +90,7 @@ async def get_commercial(db: AsyncSession, commercial_id: int):
     result = await db.execute(select(Commercial).filter_by(id=commercial_id))
     commercial = result.scalars().first()
     if not commercial:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Commercial not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Коммерческий объект не найден")
 
     return commercial
 
@@ -120,12 +108,7 @@ async def update_commercial(
     print(db_commercial)
     if not user.is_superuser and user.full_name != db_commercial.responsible:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="You are not allowed to update this commercial")
-
-    if db_commercial.deal:
-        if not user.is_superuser:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This commercial is busy. Not allowed to update')
-
+                            detail="Этот объект может изменить только ответственный")
 
     await validate_commercial(db, commercial)
 
@@ -185,6 +168,6 @@ async def delete_commercial(db: AsyncSession, commercial_id: int):
 
         await db.delete(db_commercial)
         await db.commit()
-        return {"detail": "Commercial deleted"}
+        return {"detail": "Коммерческий объект удален"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

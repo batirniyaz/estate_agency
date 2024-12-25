@@ -9,8 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.bot.handlers import send_message_to_channel
-from app.object.functions import generate_crm_id, house_condition_translation, bathroom_translation
+from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
+from app.object.messages import send_rent_apart, send_sale_apart
 from app.object.models import CurrentStatus
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.schemas.apartment import ApartmentCreate, ApartmentUpdate, ApartmentResponse
@@ -18,6 +19,7 @@ from app.report.deals.crud import create_deal
 from app.utils.file_utils import save_upload_file
 
 from app.object.functions.validations.validate_apartment import validate_apartment
+from app.config import CHANNEL_RENT_ID, CHANNEL_SALE_ID
 
 
 async def create_apartment(
@@ -57,21 +59,13 @@ async def create_apartment(
         await db.commit()
         await db.refresh(db_apartment)
 
-        message = (f'<b>Сдаётся шикарная квартира🏡</b>\n\n📍Район: {db_apartment.district}\n'
-                   f'📍Адрес: {db_apartment.title}\n\n'
-                   f'🎯{db_apartment.rooms} комн {db_apartment.floor}/{db_apartment.floor_number}'
-                   f'\n🎯Площадь: {db_apartment.square_area} м²\n'
-                   f'🎯{house_condition_translation.get(db_apartment.house_condition.name, db_apartment.house_condition.name)}✅\n'
-                   f'🎯Санузел {bathroom_translation.get(db_apartment.bathroom.name, db_apartment.bathroom.name)}✅\n\n'
-                   f'❗Депозит: Договорная\n'
-                   f'❗Предоплата: Договорная\n'
-                   f'💰Цена: {db_apartment.price}$ есть торг\n'
-                   f'🌀Срм - {db_apartment.crm_id}\n\n'
-                   f'С уважением {db_apartment.responsible}\n'
-                   f'Специалист по недвижимости!\n'
-                   f'Имеется также более 10000 вариантов по всему городу.✅\n')
+        if db_apartment.action_type == 'rent':
+            message = await send_rent_apart(db_apartment)
+        else:
+            message = await send_sale_apart(db_apartment, current_user.phone)
 
-        background_tasks.add_task(send_message_to_channel, message, db_apartment.media)
+        background_tasks.add_task(send_message_to_channel, message, db_apartment.media,
+                                  CHANNEL_RENT_ID if db_apartment.action_type == 'rent' else CHANNEL_SALE_ID)
 
         apartment_response = ApartmentResponse.model_validate(db_apartment)
         return jsonable_encoder(apartment_response)
@@ -79,10 +73,10 @@ async def create_apartment(
     except IntegrityError as e:
         if 'duplicate key value violates unique constraint' in str(e):
             print(e)
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Apartment already exists")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Квартира с таким номером уже существует")
         raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Произошла ошибка: {str(e)}")
     pass
 
 
@@ -98,7 +92,7 @@ async def get_apartment(db: AsyncSession, apartment_id: int):
     result = await db.execute(select(Apartment).filter_by(id=apartment_id))
     apartment = result.scalars().first()
     if not apartment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Apartment not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Квартира не найдена")
 
     return apartment
 
@@ -114,11 +108,7 @@ async def update_apartment(
 
     db_apartment = await get_apartment(db, apartment_id)
     if not user.is_superuser and user.full_name != db_apartment.responsible:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='This object created by another agent')
-
-    if db_apartment.deal:
-        if not user.is_superuser:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This apartment is busy. Not allowed to update')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Этот объект может изменить только ответственный')
 
     await validate_apartment(db, apartment)
     try:
@@ -181,6 +171,6 @@ async def delete_apartment(db: AsyncSession, apartment_id: int):
 
         await db.delete(db_apartment)
         await db.commit()
-        return {"detail": "Apartment deleted"}
+        return {"detail": "Квартира удалена"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

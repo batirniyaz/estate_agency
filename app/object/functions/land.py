@@ -78,10 +78,10 @@ async def create_land(
     except IntegrityError as e:
         if 'duplicate key value violates unique constraint' in str(e):
             print(e)
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Land already exists")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Земельный участок с таким номером уже существует")
         raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Произошла ошибка: {str(e)}")
 
 
 async def get_lands(db: AsyncSession, limit: int = 10, page: int = 1):
@@ -99,7 +99,7 @@ async def get_land(db: AsyncSession, land_id: int):
     result = await db.execute(select(Land).filter_by(id=land_id))
     land = result.scalars().first()
     if not land:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Land not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Земельный участок не найден")
 
     return land
 
@@ -115,12 +115,7 @@ async def update_land(
 
     db_land = await get_land(db, land_id)
     if user.full_name != db_land.responsible and not user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='This object created by another agent')
-
-    if land.deal:
-        if not user.is_superuser:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='This commercial is busy. Not allowed to update')
-
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Этот объект может изменить только ответственный')
 
     await validate_land(db, land)
     try:
@@ -180,7 +175,7 @@ async def delete_land(db: AsyncSession, land_id: int):
 
         await db.delete(db_land)
         await db.commit()
-        return {"detail": "Land deleted successfully"}
+        return {"detail": "Земельный участок успешно удалён"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
