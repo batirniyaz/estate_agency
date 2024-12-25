@@ -18,7 +18,9 @@ MAX_VIDEO_SIZE = 30 * 1024 * 1024  # 30 MB
 
 # Telegram
 TOKEN = os.getenv("TOKEN")
-CHANNEL_ID = os.getenv("CHANNEL_ID")
+CHANNEL_RENT_ID = os.getenv("CHANNEL_RENT_ID")
+CHANNEL_SALE_ID = os.getenv("CHANNEL_SALE_ID")
+
 ADMIN_ID = os.getenv("ADMIN_ID")
 
 BASE_URL = os.getenv('MY_URL')
