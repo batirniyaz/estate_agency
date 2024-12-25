@@ -2,9 +2,7 @@ from telebot import types
 
 from .instance import bot
 
-from app.config import CHANNEL_ID, BASE_URL
-
-id_channel = '-100' + CHANNEL_ID
+from app.config import BASE_URL
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -20,8 +18,9 @@ async def get_id(message: types.Message):
     await bot.send_message(message.chat.id, '\n'.join([f'cid: {cid}', f'mid: {mid}', f'fid: {fid}']))
 
 
-async def send_message_to_channel(message: str, media: list):
+async def send_message_to_channel(message: str, media: list, channel_id: str):
     media_list = []
+    id_channel = '-100' + channel_id
 
     for index, obj in enumerate(media):
         if obj.media_type == 'image':
@@ -40,4 +39,4 @@ async def send_message_to_channel(message: str, media: list):
     if media_list:
         await bot.send_media_group(id_channel, media_list)
     else:
-        await bot.send_message(id_channel, message, parse_mode='HTML')
+        await bot.send_message(id_channel, message, parse_mode='HTML', disable_web_page_preview=True)
