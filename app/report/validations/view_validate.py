@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.auth.utils import get_users
+from app.district.crud import get_districts
 from app.object.models.apartment import Apartment
 from app.object.models.commercial import Commercial
 from app.object.models.land import Land
@@ -16,9 +17,18 @@ async def validate_view(db: AsyncSession, view: ViewCreate):
         if view.responsible not in [agent.full_name for agent in agents]:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ответственный агент не найден")
 
-    if view.object_sum or view.commission_sum:
-        if view.object_sum < 0 or view.commission_sum < 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Сумма комиссии и стоимость объекта не могут быть отрицательными")
+    if view.district:
+        districts = await get_districts(db)
+        if view.district not in [district.name for district in districts]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Район не найден")
+
+    if view.price:
+        if view.price < 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Цена не может быть отрицательной")
+
+    if view.commission:
+        if view.commission < 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Комиссия не может быть отрицательной")
 
     if view.agent_percent:
         if view.agent_percent > 100 or view.agent_percent < 0:
