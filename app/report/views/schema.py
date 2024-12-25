@@ -10,15 +10,20 @@ class ViewBase(BaseModel):
     action_type: ActionType = Field(..., description="The action type", examples=["SALE", "RENT"])
     responsible: str = Field(..., description="The responsible person of the view", examples=['Akobir'])
     date: str = Field(..., description="The date", examples=["2022-01-01"])
-    object_sum: int = Field(..., description="The number of objects", examples=[10])
-    commission_sum: int = Field(..., description="The commission sum", examples=[1000])
+    time: str = Field(..., description="The time", examples=["12:00"])
+    district: Optional[str] = Field(None, description="The district", examples=["Yunusabad"])
+    price: int = Field(..., description="The price", examples=[100000])
+    commission: float = Field(..., description="The commission", examples=[10000])
     agent_percent: int = Field(..., description="The agent percent", examples=[10])
+    status_deal: bool = Field(False, description="The status deal", examples=[False])
     crm_id: str = Field(..., description="The CRM ID", examples=["A1"])
+    client_number: Optional[str] = Field(None, max_length=13, description="The client number", examples=["+998901234567"])
+    owner_number: Optional[str] = Field(None, max_length=13, description="The owner number", examples=["+998901234567"])
 
     @field_validator('date')
     def date_not_in_past(cls, v):
-        if datetime.date.fromisoformat(v) < datetime.date.today():
-            raise ValueError('Время просмотра не может быть в прошлом')
+        if datetime.date.fromisoformat(v) > datetime.date.today():
+            raise ValueError('Время показа не может быть в будущем')
         return v
 
 
@@ -30,10 +35,15 @@ class ViewUpdate(ViewBase):
     action_type: Optional[ActionType] = Field(None, description="The action type", examples=["SALE", "RENT"])
     responsible: Optional[str] = Field(None, description="The responsible person of the view", examples=['Akobir'])
     date: Optional[str] = Field(None, description="The date", examples=["2022-01-01"])
-    object_sum: Optional[int] = Field(None, description="The number of objects", examples=[10])
-    commission_sum: Optional[int] = Field(None, description="The commission sum", examples=[1000])
+    time: Optional[str] = Field(None, description="The time", examples=["12:00"])
+    district: Optional[str] = Field(None, description="The district", examples=["Yunusabad"])
+    price: Optional[int] = Field(None, description="The price", examples=[100000])
+    commission: Optional[float] = Field(None, description="The commission", examples=[10000])
     agent_percent: Optional[int] = Field(None, description="The agent percent", examples=[10])
+    status_deal: Optional[bool] = Field(None, description="The status deal", examples=[False])
     crm_id: Optional[str] = Field(None, description="The CRM ID", examples=["A1"])
+    client_number: Optional[str] = Field(None, max_length=13, description="The client number", examples=["+998901234567"])
+    owner_number: Optional[str] = Field(None, max_length=13, description="The owner number", examples=["+998901234567"])
 
 
 class ViewResponse(ViewBase):
@@ -52,10 +62,15 @@ class ViewResponse(ViewBase):
                 "action_type": "SALE",
                 "responsible": "Akobir",
                 "date": "2022-01-01",
-                "object_sum": 10,
-                "commission_sum": 1000,
+                "time": "12:00",
+                "district": "Yunusabad",
+                "price": 100000,
+                "commission": 10000,
                 "agent_percent": 10,
+                "status_deal": False,
                 "crm_id": "A1",
+                "client_number": "+998901234567",
+                "owner_number": "+998901234567",
                 "created_at": "2021-08-01T12:00:00",
                 "updated_at": "2021-08-01T12:00:00"
             }
