@@ -22,7 +22,7 @@ class ClientBase(BaseModel):
     @field_validator('date')
     def date_not_in_past(cls, v):
         if datetime.date.fromisoformat(v) > datetime.date.today():
-            raise ValueError('Дата показа не может быть в будущем')
+            raise ValueError('Дата сохранения клиента не может быть в будущем')
         return v
 
 
