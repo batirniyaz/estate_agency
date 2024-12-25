@@ -4,15 +4,20 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 from app.object.models import ActionType
+from app.report.clients.model import ClientStatus, DealStatus
 
 
 class ClientBase(BaseModel):
     action_type: ActionType = Field(..., description="The action type", examples=["SALE", "RENT"])
     responsible: str = Field(..., description="The responsible person of the client", examples=['Akobir'])
+    client_name: str = Field(None, description="The name of the client", examples=['John'])
     date: str = Field(..., description="The date", examples=["2022-01-01"])
-    hot_clients: int = Field(..., description="The number of hot clients", examples=[10])
-    cold_clients: int = Field(..., description="The number of cold clients", examples=[10])
-    calls: int = Field(..., description="The number of calls", examples=[10])
+    district: list = Field([], description="The district", examples=[['Yunusabad', 'Mirzo Ulugbek']])
+    budget: int = Field(None, description="The budget", examples=[100000])
+    comment: str = Field(None, description="The comment", examples=['Good client'])
+    client_status: ClientStatus = Field(None, description="The client status", examples=["HOT", "COLD"])
+    deal_status: Optional[DealStatus] = Field(None, description="The deal status",
+                             examples=["INITIAL_CONTACT", "NEGOTIATION", "DECISION_MAKING", "AGREEMENT_CONTACT", "DEAL"])
 
     @field_validator('date')
     def date_not_in_past(cls, v):
@@ -28,10 +33,15 @@ class ClientCreate(ClientBase):
 class ClientUpdate(ClientBase):
     action_type: Optional[ActionType] = Field(None, description="The action type", examples=["SALE", "RENT"])
     responsible: Optional[str] = Field(None, description="The responsible person of the client", examples=['Akobir'])
+    client_name: Optional[str] = Field(None, description="The name of the client", examples=['John'])
     date: Optional[str] = Field(None, description="The date", examples=["2022-01-01"])
-    hot_clients: Optional[int] = Field(None, description="The number of hot clients", examples=[10])
-    cold_clients: Optional[int] = Field(None, description="The number of cold clients", examples=[10])
-    calls: Optional[int] = Field(None, description="The number of calls", examples=[10])
+    district: Optional[list] = Field(None, description="The district", examples=[['Yunusabad', 'Mirzo Ulugbek']])
+    budget: Optional[int] = Field(None, description="The budget", examples=[100000])
+    comment: Optional[str] = Field(None, description="The comment", examples=['Good client'])
+    client_status: Optional[ClientStatus] = Field(None, description="The client status", examples=["HOT", "COLD"])
+    deal_status: Optional[DealStatus] = Field(None, description="The deal status",
+                                examples=["INITIAL_CONTACT", "NEGOTIATION", "DECISION_MAKING", "AGREEMENT_CONTACT", "DEAL"])
+
 
 
 class ClientResponse(ClientBase):
@@ -49,10 +59,13 @@ class ClientResponse(ClientBase):
                 "id": 1,
                 "action_type": "SALE",
                 "responsible": "Akobir",
+                "client_name": "John",
                 "date": "2022-01-01",
-                "hot_clients": 10,
-                "cold_clients": 10,
-                "calls": 10,
+                "district": ['Yunusabad', 'Mirzo Ulugbek'],
+                "budget": 100000,
+                "comment": "Good client",
+                "client_status": "HOT",
+                "deal_status": "INITIAL_CONTACT",
                 "created_at": "2021-08-01T12:00:00",
                 "updated_at": "2021-08-01T12:00:00"
             }
