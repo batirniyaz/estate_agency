@@ -20,11 +20,3 @@ async def validate_client(db: AsyncSession, client: ClientCreate):
     if client.budget:
         if client.budget < 0:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Бюджет не может быть отрицательным")
-
-    if client.client_status:
-        if client.client_status not in ["hot", "cold"]:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус клиента должен быть горячим или холодным")
-
-
-
-
