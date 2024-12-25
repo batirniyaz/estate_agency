@@ -234,9 +234,9 @@ async def log_login_info(db: AsyncSession, user_id, email, phone):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_login_info(db: AsyncSession):
+async def get_login_info(db: AsyncSession, limit: int = 10, page: int = 1):
     try:
-        res = await db.execute(select(LoginInfo))
+        res = await db.execute(select(LoginInfo).limit(limit).offset((page - 1) * limit).order_by(LoginInfo.id.desc()))
         login_info = res.scalars().all()
         return login_info or []
     except Exception as e:

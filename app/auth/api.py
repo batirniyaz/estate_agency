@@ -121,12 +121,14 @@ async def read_user_me(
 @router.get("/login_info/")
 async def get_login_info_endpoint(
         current_user: Annotated[UserRead, Depends(get_current_active_user)],
-        db: Annotated[AsyncSession, Depends(get_async_session)]
+        db: Annotated[AsyncSession, Depends(get_async_session)],
+        limit: int = 10,
+        page: int = 1
 ):
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view login info")
-    return await get_login_info(db)
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="У вас нет прав на просмотр логов входа")
+    return await get_login_info(db, limit, page)
 
 
 @router.post("/forgot_password/")
