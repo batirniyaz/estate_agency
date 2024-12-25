@@ -46,7 +46,7 @@ async def update_client_endpoint(
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await update_client(db, client_id, client)
+    return await update_client(db, client_id, client, current_user)
 
 
 @router.delete("/{client_id}")
