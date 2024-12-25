@@ -20,7 +20,7 @@ async def create_client_endpoint(
     return await create_client(db, client)
 
 
-@router.get("/", response_model=list[ClientResponse])
+@router.get("/")
 async def get_clients_endpoint(
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
     limit: int = 10,
