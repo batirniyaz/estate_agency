@@ -10,11 +10,11 @@ async def validate_media(media):
         if media_type == "video":
             if len(file_size) > MAX_VIDEO_SIZE:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    detail="Video size is too large")
+                                    detail="Размер видеофайла слишком большой")
         elif media_type == "image":
             if len(file_size) > MAX_IMAGE_SIZE:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    detail="Image size is too large")
+                                    detail="Размер изображения слишком большой")
         else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid media type")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Неверный формат файла")
         await file.seek(0)
