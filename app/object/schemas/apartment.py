@@ -68,7 +68,6 @@ class ApartmentBase(BaseModel):
     second_agent_percent: Optional[int] = Field(None, description="The second agent percent of the apartment", examples=[10])
     second_agent_commission: Optional[float] = Field(None, description="The second agent commission of the apartment",
                                                      examples=[100])
-    deal: bool = Field(False, description="The deal status of the apartment", examples=[True, False])
 
 
 class ApartmentCreate(ApartmentBase):
