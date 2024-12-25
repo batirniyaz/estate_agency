@@ -54,5 +54,5 @@ async def update_land_endpoint(current_user: Annotated[UserRead, Depends(get_cur
 async def delete_land_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                land_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
     if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='У вас нет прав на удаление земельного участка')
     return await delete_land(db, land_id)

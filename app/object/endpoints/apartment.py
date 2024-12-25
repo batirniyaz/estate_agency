@@ -58,7 +58,7 @@ async def update_apartment_endpoint(current_user: Annotated[UserRead, Depends(ge
 async def delete_apartment_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                     apartment_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
     if not current_user.is_superuser:
-        HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
+        HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='У вас нет прав на удаление квартиры')
     return await delete_apartment(db, apartment_id)
 
 

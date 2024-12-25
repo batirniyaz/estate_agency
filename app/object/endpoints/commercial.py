@@ -59,6 +59,6 @@ async def update_commercial_endpoint(current_user: Annotated[UserRead, Depends(g
 async def delete_commercial_endpoint(current_user: Annotated[UserRead, Depends(get_current_active_user)],
                                      commercial_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]):
     if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Only admin can delete objects')
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='У вас нет прав на удаление коммерческого объекта')
     return await delete_commercial(db, commercial_id)
 
