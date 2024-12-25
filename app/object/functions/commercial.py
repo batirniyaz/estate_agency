@@ -58,7 +58,7 @@ async def create_commercial(
         await db.commit()
         await db.refresh(db_commercial)
 
-
+        message = ''
 
         background_tasks.add_task(send_message_to_channel, message, db_commercial.media)
 
