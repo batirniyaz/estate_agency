@@ -121,7 +121,7 @@ def register_event_listener(model: Type):
 
 async def get_changes_log(db, limit: int = 10, page: int = 1):
     try:
-        result = await db.execute(select(ChangeLog).limit(limit).offset((page - 1) * limit))
+        result = await db.execute(select(ChangeLog).limit(limit).offset((page - 1) * limit).order_by(ChangeLog.created_at.desc()))
         changes = result.scalars().all()
 
         return changes if changes else []
