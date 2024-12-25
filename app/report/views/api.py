@@ -22,7 +22,7 @@ async def create_view_endpoint(
     return await create_view(db, view)
 
 
-@router.get("/", response_model=list[ViewResponse])
+@router.get("/")
 async def get_views_endpoint(
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
     limit: int = 10,
@@ -48,7 +48,7 @@ async def update_view_endpoint(
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await update_view(db, view_id, view)
+    return await update_view(db, view_id, view, current_user)
 
 
 @router.delete("/{view_id}")
