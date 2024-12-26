@@ -15,7 +15,7 @@ async def create_client(db: AsyncSession, client: ClientCreate):
     await validate_client(db, client)
     if client.action_type == ActionType.SALE and not client.deal_status:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус сделки обязателен для продажи")
-    else:
+    elif client.action_type != ActionType.SALE:
         client.deal_status = None
 
     try:
