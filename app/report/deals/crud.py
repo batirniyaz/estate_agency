@@ -33,7 +33,7 @@ async def create_deal(db: AsyncSession,
 
 
 async def get_deals(db: AsyncSession, limit: int = 10, page: int = 1):
-    res = await db.execute(select(Deal).limit(limit).offset((page - 1) * limit))
+    res = await db.execute(select(Deal).limit(limit).offset((page - 1) * limit).order_by(Deal.id.desc()))
     deals = res.scalars().all()
     total_count = await db.scalar(select(func.count(Deal.id)))
 
