@@ -59,10 +59,10 @@ async def update_client(db: AsyncSession, client_id: int, client: ClientUpdate, 
 
     await validate_client(db, client)
 
-    if client.action_type == ActionType.SALE and not client.deal_status:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус сделки обязателен для продажи")
-    else:
-        client.deal_status = None
+    # if client.action_type == ActionType.SALE and not db_client.deal_status:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Статус сделки обязателен для продажи")
+    # else:
+    #     client.deal_status = None
 
     try:
 
