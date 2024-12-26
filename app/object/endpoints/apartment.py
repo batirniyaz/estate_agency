@@ -1,4 +1,3 @@
-from codecs import backslashreplace_errors
 from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Query, BackgroundTasks
