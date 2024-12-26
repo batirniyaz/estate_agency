@@ -32,10 +32,10 @@ async def create_deal(db: AsyncSession,
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_deals(db: AsyncSession, limit: int = 10, page: int = 1):
-    res = await db.execute(select(Deal).limit(limit).offset((page - 1) * limit).order_by(Deal.id.desc()))
+async def get_deals(db: AsyncSession, action_type: ActionType, limit: int = 10, page: int = 1):
+    res = await db.execute(select(Deal).filter_by(action_type=action_type).limit(limit).offset((page - 1) * limit).order_by(Deal.id.desc()))
     deals = res.scalars().all()
-    total_count = await db.scalar(select(func.count(Deal.id)))
+    total_count = await db.scalar(select(func.count(Deal.id)).filter_by(action_type=action_type))
 
     return {"data": deals or [], "total_count": total_count}
 
