@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schema import UserRead
@@ -16,10 +16,11 @@ router = APIRouter()
 @router.post("/", response_model=ViewResponse)
 async def create_view_endpoint(
     view: ViewCreate,
+    background_tasks: BackgroundTasks,
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await create_view(db, view)
+    return await create_view(db, view, background_tasks)
 
 
 @router.get("/")
@@ -45,10 +46,11 @@ async def get_view_endpoint(
 async def update_view_endpoint(
     view_id: int,
     view: ViewUpdate,
+    background_tasks: BackgroundTasks,
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await update_view(db, view_id, view, current_user)
+    return await update_view(db, view_id, view, current_user, background_tasks)
 
 
 @router.delete("/{view_id}")
