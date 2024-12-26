@@ -30,10 +30,10 @@ async def create_client(db: AsyncSession, client: ClientCreate):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_clients(db: AsyncSession, limit: int = 10, page: int = 1):
-    res = await db.execute(select(Client).limit(limit).offset((page - 1) * limit).order_by(Client.id.desc()))
+async def get_clients(db: AsyncSession, action_type: ActionType, limit: int = 10, page: int = 1):
+    res = await db.execute(select(Client).filter_by(action_type=action_type).limit(limit).offset((page - 1) * limit).order_by(Client.id.desc()))
     clients = res.scalars().all()
-    total_count = await db.scalar(select(func.count(Client.id)))
+    total_count = await db.scalar(select(func.count(Client.id)).filter_by(action_type=action_type))
 
     return {"data": clients or [], "total_count": total_count}
 

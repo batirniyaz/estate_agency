@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schema import UserRead
 from app.auth.utils import get_current_active_user
+from app.object.models import ActionType
 from app.report.clients.crud import create_client, get_clients, get_client, update_client, delete_client
 from app.report.clients.schema import ClientCreate, ClientResponse, ClientUpdate
 from app.database import get_async_session
@@ -23,11 +24,12 @@ async def create_client_endpoint(
 @router.get("/")
 async def get_clients_endpoint(
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
+    action_type: ActionType,
     limit: int = 10,
     page: int = 1,
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await get_clients(db, limit, page)
+    return await get_clients(db, action_type, limit, page)
 
 
 @router.get("/{client_id}", response_model=ClientResponse)
