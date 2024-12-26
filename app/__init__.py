@@ -10,6 +10,7 @@ from app.additional.api import router as additional_router
 from app.report.views.api import router as view_router
 from app.report.clients.api import router as client_router
 from app.report.deals.api import router as deal_router
+from app.report.Accounting.api import router as accounting_router
 
 router = APIRouter()
 
@@ -24,4 +25,5 @@ router.include_router(additional_router, prefix='/additional', tags=["Additional
 router.include_router(view_router, prefix='/views', tags=["Views"])
 router.include_router(client_router, prefix='/clients', tags=["Clients"])
 router.include_router(deal_router, prefix='/deals', tags=["Deals"])
+router.include_router(accounting_router, prefix='/accounting', tags=["Accounting"])
 
