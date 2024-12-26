@@ -1,4 +1,3 @@
-from signal import valid_signals
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
@@ -6,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.object.models import ActionType
-from app.report.clients.model import Client
+from app.report.clients.model import Client, DealStatus
 from app.report.clients.schema import ClientCreate, ClientUpdate
 from app.report.validations.client_validate import validate_client
 
@@ -54,6 +53,9 @@ async def update_client(db: AsyncSession, client_id: int, client: ClientUpdate, 
     db_client = await get_client(db, client_id)
     if not current_user.is_superuser and db_client.responsible != current_user.full_name:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Вы не можете редактировать этот клиент")
+
+    if db_client.deal_status == DealStatus.DEAL:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Нельзя редактировать завершенного клиента")
 
     await validate_client(db, client)
 
