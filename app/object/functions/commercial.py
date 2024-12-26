@@ -9,12 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.bot.handlers import send_message_to_channel
-from app.object.functions import generate_crm_id, house_condition_translation
+from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
 from app.object.models import CurrentStatus
 from app.object.models.commercial import CommercialMedia, Commercial
 from app.object.schemas.commercial import CommercialCreate, CommercialResponse, CommercialUpdate
-from app.report.deals.crud import create_deal
 from app.utils.file_utils import save_upload_file
 
 from app.object.functions.validations.validate_commercial import validate_commercial
@@ -143,12 +142,6 @@ async def update_commercial(
 
         await db.commit()
         await db.refresh(db_commercial)
-
-        if commercial.deal:
-            background_tasks.add_task(create_deal, db, db_commercial.action_type, db_commercial.responsible,
-                                      db_commercial.updated_at.strftime('%Y-%m-%d'), db_commercial.crm_id, db_commercial.price,
-                                      db_commercial.agent_commission, db_commercial.agent_percent)
-
 
         commercial_response = CommercialResponse.model_validate(db_commercial)
         return jsonable_encoder(commercial_response)

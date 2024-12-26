@@ -14,7 +14,6 @@ from app.object.functions.validations.validate_media import validate_media
 from app.object.models import CurrentStatus
 from app.object.models.land import LandMedia, Land
 from app.object.schemas.land import LandCreate, LandResponse, LandUpdate
-from app.report.deals.crud import create_deal
 from app.utils.file_utils import save_upload_file
 
 from app.object.functions.validations.validate_land import validate_land
@@ -149,12 +148,6 @@ async def update_land(
         db.add(db_land)
         await db.commit()
         await db.refresh(db_land)
-
-        if land.deal:
-            background_tasks.add_task(create_deal, db, db_land.action_type, db_land.responsible,
-                                      db_land.updated_at.strftime('%Y-%m-%d'), db_land.crm_id,
-                                      db_land.price,
-                                      db_land.agent_commission, db_land.agent_percent)
 
         land_response = LandResponse.model_validate(db_land)
         return jsonable_encoder(land_response)
