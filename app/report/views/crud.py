@@ -3,6 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.object.models import ActionType
 from app.object.models.apartment import Apartment
 from app.report.deals.crud import create_deal
 from app.report.validations.view_validate import validate_view
@@ -39,10 +40,10 @@ async def create_view(db: AsyncSession, view: ViewCreate, bg_tasks: BackgroundTa
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_views(db: AsyncSession, limit: int = 10, page: int = 1):
-    res = await db.execute(select(View).limit(limit).offset((page - 1) * limit).order_by(View.id.desc()))
+async def get_views(db: AsyncSession, action_type: ActionType, limit: int = 10, page: int = 1):
+    res = await db.execute(select(View).filter_by(action_type=action_type).limit(limit).offset((page - 1) * limit).order_by(View.id.desc()))
     views = res.scalars().all()
-    total_count = await db.scalar(select(func.count(View.id)))
+    total_count = await db.scalar(select(func.count(View.id)).filter_by(action_type=action_type))
 
     return {"data": views or [], "total_count": total_count}
 

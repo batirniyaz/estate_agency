@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.schema import UserRead
 from app.auth.utils import get_current_active_user
 from app.database import get_async_session
+from app.object.models import ActionType
 
 from app.report.views.crud import create_view, get_views, get_view, update_view, delete_view
 from app.report.views.schema import ViewCreate, ViewResponse, ViewUpdate
@@ -26,11 +27,12 @@ async def create_view_endpoint(
 @router.get("/")
 async def get_views_endpoint(
     current_user: Annotated[UserRead, Depends(get_current_active_user)],
+    action_type: ActionType,
     limit: int = 10,
     page: int = 1,
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await get_views(db, limit, page)
+    return await get_views(db, action_type, limit, page)
 
 
 @router.get("/{view_id}", response_model=ViewResponse)
