@@ -9,8 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.bot.handlers import send_message_to_channel
+from app.config import CHANNEL_RENT_ID, CHANNEL_SALE_ID
 from app.object.functions import generate_crm_id, house_condition_translation
 from app.object.functions.validations.validate_media import validate_media
+from app.object.messages import send_rent_land, send_sale_land
 from app.object.models import CurrentStatus
 from app.object.models.land import LandMedia, Land
 from app.object.schemas.land import LandCreate, LandResponse, LandUpdate
@@ -55,21 +57,13 @@ async def create_land(
         await db.commit()
         await db.refresh(db_land)
 
-        message = (f'<b>Сдаётся шикарный участок🏡</b>\n\n📍Район: {db_land.district}\n'
-                                      f'📍Адрес: {db_land.title}\n\n'
-                                      f'🎯{db_land.rooms} комн {db_land.floor_number}'
-                                      f'\n🎯Площадь: {db_land.square_area} м²\n'
-                                      f'🎯{house_condition_translation.get(db_land.house_condition.name)}✅\n'
-                                      f'🎯Mебель {"✅" if db_land.furnished else "❌"}\n\n'
-                                      f'❗Депозит: Договорная\n'
-                                      f'❗Предоплата: Договорная\n'
-                                      f'💰Цена: {db_land.price}$ есть торг\n'
-                                      f'🌀Срм - {db_land.crm_id}\n\n'
-                                      f'С уважением {db_land.responsible}\n'
-                                      f'Специалист по недвижимости!\n'
-                                      f'Имеется также более 10000 вариантов по всему городу.✅\n')
+        if db_land.action_type == 'rent':
+            message = await send_rent_land(db_land)
+        else:
+            message = await send_sale_land(db_land, current_user.phone)
 
-        background_tasks.add_task(send_message_to_channel, message, db_land.media)
+        background_tasks.add_task(send_message_to_channel, message, db_land.media,
+                                  CHANNEL_RENT_ID if db_land.action_type == 'rent' else CHANNEL_SALE_ID)
 
         land_response = LandResponse.model_validate(db_land)
         return jsonable_encoder(land_response)
