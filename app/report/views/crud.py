@@ -1,17 +1,16 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, BackgroundTasks
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.object.models.apartment import Apartment
-from app.object.models.commercial import Commercial
-from app.object.models.land import Land
+from app.report.deals.crud import create_deal
 from app.report.validations.view_validate import validate_view
 from app.report.views.model import View
 from app.report.views.schema import ViewCreate, ViewUpdate
 
 
-async def create_view(db: AsyncSession, view: ViewCreate):
+async def create_view(db: AsyncSession, view: ViewCreate, bg_tasks: BackgroundTasks = None):
 
     await validate_view(db, view)
 
@@ -28,6 +27,12 @@ async def create_view(db: AsyncSession, view: ViewCreate):
         db.add(db_view)
         await db.commit()
         await db.refresh(db_view)
+
+        if db_view.status_deal:
+            bg_tasks.add_task(create_deal, db=db, action_type=db_view.action_type, responsible=db_view.responsible,
+                              date=db_view.date, crm_id=db_view.crm_id, object_price=db_view.price,
+                              commission=db_view.commission, agent_percent=db_view.agent_percent)
+
         return db_view
     except Exception as e:
         await db.rollback()
@@ -35,7 +40,7 @@ async def create_view(db: AsyncSession, view: ViewCreate):
 
 
 async def get_views(db: AsyncSession, limit: int = 10, page: int = 1):
-    res = await db.execute(select(View).limit(limit).offset((page - 1) * limit))
+    res = await db.execute(select(View).limit(limit).offset((page - 1) * limit).order_by(View.id.desc()))
     views = res.scalars().all()
     total_count = await db.scalar(select(func.count(View.id)))
 
@@ -52,11 +57,14 @@ async def get_view(db: AsyncSession, view_id: int):
     return view
 
 
-async def update_view(db: AsyncSession, view_id: int, view: ViewUpdate, current_user):
+async def update_view(db: AsyncSession, view_id: int, view: ViewUpdate, current_user, bg_tasks: BackgroundTasks = None):
 
     db_view = await get_view(db, view_id)
     if not current_user.is_superuser and db_view.responsible != current_user.full_name:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Вы не можете редактировать этот показ")
+
+    if db_view.status_deal:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Нельзя редактировать завершенный показ")
 
     await validate_view(db, view)
 
@@ -75,6 +83,12 @@ async def update_view(db: AsyncSession, view_id: int, view: ViewUpdate, current_
 
         await db.commit()
         await db.refresh(db_view)
+
+        if db_view.status_deal:
+            bg_tasks.add_task(create_deal, db=db, action_type=db_view.action_type, responsible=db_view.responsible,
+                              date=db_view.date, crm_id=db_view.crm_id, object_price=db_view.price,
+                              commission=db_view.commission, agent_percent=db_view.agent_percent)
+
         return db_view
     except Exception as e:
         await db.rollback()
