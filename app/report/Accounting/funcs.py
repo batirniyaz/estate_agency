@@ -158,6 +158,6 @@ async def get_overall_data(
         "deals": deals, "deals_count": len(deals), "views": views, "views_count": len(views),
         "clients": clients, "clients_count": len(clients), "commission_count": sum([deal.commission for deal in deals]),
         "hot_count": len([client for client in clients if client.client_status == ClientStatus.HOT]),
-        "cold_count": sum([client for client in clients if client.client_status == ClientStatus.COLD]),
+        "cold_count": len([client for client in clients if client.client_status == ClientStatus.COLD]),
         "all_objects": len(lands) + len(apartments) + len(commercials),
     }
