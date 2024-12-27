@@ -34,15 +34,6 @@ async def get_overall_data(
     if date and (start_date or end_date):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Нельзя указать дату и диапазон дат")
 
-    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d' if len(start_date) == 10 else '%Y-%m' if len(
-        start_date) == 7 else '%Y')
-    end_date_obj = datetime.strptime(end_date,
-                                     '%Y-%m-%d' if len(end_date) == 10 else '%Y-%m' if len(end_date) == 7 else '%Y')
-
-    if start_date_obj > end_date_obj:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Дата начала не может быть больше даты окончания")
-
     deal_query = select(Deal).filter_by(action_type=action_type)
     view_query = select(View).filter_by(action_type=action_type)
     client_query = select(Client).filter_by(action_type=action_type)
@@ -86,6 +77,15 @@ async def get_overall_data(
 
 
     elif start_date and end_date:
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d' if len(start_date) == 10 else '%Y-%m' if len(
+            start_date) == 7 else '%Y')
+        end_date_obj = datetime.strptime(end_date,
+                                         '%Y-%m-%d' if len(end_date) == 10 else '%Y-%m' if len(end_date) == 7 else '%Y')
+
+        if start_date_obj > end_date_obj:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Дата начала не может быть больше даты окончания")
+
         if len(start_date) == 10 and len(end_date) == 10:
             deal_query = deal_query.filter(Deal.date >= start_date, Deal.date <= end_date)
             view_query = view_query.filter(View.date >= start_date, View.date <= end_date)
