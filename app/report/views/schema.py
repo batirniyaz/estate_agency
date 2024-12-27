@@ -13,7 +13,7 @@ class ViewBase(BaseModel):
     time: str = Field(..., description="The time", examples=["12:00"])
     district: Optional[str] = Field(None, description="The district", examples=["Yunusabad"])
     price: int = Field(..., description="The price", examples=[100000])
-    commission: float = Field(..., description="The commission", examples=[10000])
+    commission: Optional[float] = Field(None, description="The commission", examples=[10000])
     agent_percent: int = Field(..., description="The agent percent", examples=[10])
     status_deal: bool = Field(False, description="The status deal", examples=[False])
     crm_id: str = Field(..., description="The CRM ID", examples=["A1"])
