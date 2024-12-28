@@ -3,12 +3,11 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException, status
 from typing import Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from sqlalchemy.future import select
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.additional.filter import filter_objects
 from app.object.models import ActionType
 from app.object.models.apartment import Apartment
 from app.object.models.commercial import Commercial
@@ -16,6 +15,55 @@ from app.object.models.land import Land
 from app.report.clients.model import Client, ClientStatus
 from app.report.deals.model import Deal
 from app.report.views.model import View
+
+
+async def get_counts_by_month(db):
+    months = {
+        "jan": {"sale": 0, "rent": 0},
+        "feb": {"sale": 0, "rent": 0},
+        "mar": {"sale": 0, "rent": 0},
+        "apr": {"sale": 0, "rent": 0},
+        "may": {"sale": 0, "rent": 0},
+        "jun": {"sale": 0, "rent": 0},
+        "jul": {"sale": 0, "rent": 0},
+        "aug": {"sale": 0, "rent": 0},
+        "sep": {"sale": 0, "rent": 0},
+        "oct": {"sale": 0, "rent": 0},
+        "nov": {"sale": 0, "rent": 0},
+        "dec": {"sale": 0, "rent": 0},
+    }
+
+    async def process_query(model):
+        query = select(
+            extract('month', model.created_at).label('month'),
+            model.action_type,
+            func.count(model.id).label('count')
+        ).group_by(
+            extract('month', model.created_at),
+            model.action_type
+        )
+        results = await db.execute(query)
+        return results.all()
+
+    data_land = await process_query(Land)
+    data_commercial = await process_query(Commercial)
+    data_apartment = await process_query(Apartment)
+
+    all_data = data_land + data_commercial + data_apartment
+
+    for row in all_data:
+        month = int(row.month)
+        action_type = row.action_type.name.lower()
+        count = row.count
+
+        month_name = list(months.keys())[month - 1]
+        months[month_name][action_type] += count
+
+    totals = {}
+    for month, values in months.items():
+        totals[month] = values["sale"] + values["rent"]
+
+    return months, totals
 
 
 async def get_overall_data(
@@ -154,10 +202,12 @@ async def get_overall_data(
     apartments = db_apartments.scalars().all()
     commercials = db_commercials.scalars().all()
 
+    months, total = await get_counts_by_month(db)
+
     return {
         "deals": deals, "deals_count": len(deals), "views": views, "views_count": len(views),
         "clients": clients, "clients_count": len(clients), "commission_count": sum([deal.commission for deal in deals]),
         "hot_count": len([client for client in clients if client.client_status == ClientStatus.HOT]),
         "cold_count": len([client for client in clients if client.client_status == ClientStatus.COLD]),
-        "all_objects": len(lands) + len(apartments) + len(commercials),
+        "all_objects": len(lands) + len(apartments) + len(commercials), "months": months, "total": total
     }
