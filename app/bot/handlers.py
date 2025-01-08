@@ -1,4 +1,6 @@
-from telebot import types
+import asyncio
+
+from telebot import types, asyncio_helper
 
 from .instance import bot
 
@@ -36,7 +38,17 @@ async def send_message_to_channel(message: str, media: list, channel_id: str):
         else:
             ...
 
-    if media_list:
-        await bot.send_media_group(id_channel, media_list)
-    else:
-        await bot.send_message(id_channel, message, parse_mode='HTML', disable_web_page_preview=True)
+    while True:
+        try:
+            if media_list:
+                await bot.send_media_group(id_channel, media_list)
+            else:
+                await bot.send_message(id_channel, message, parse_mode='HTML', disable_web_page_preview=True)
+            break
+        except asyncio_helper.ApiTelegramException as e:
+            if e.error_code == 429:
+                retry_after = int(e.result_json['parameters']['retry_after'])
+                print(f"Rate limit exceeded. Retrying after {retry_after} seconds.")
+                await asyncio.sleep(retry_after)
+            else:
+                raise
