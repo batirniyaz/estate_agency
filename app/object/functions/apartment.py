@@ -12,7 +12,7 @@ from app.bot.handlers import send_message_to_channel
 from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
 from app.object.messages import send_rent_apart, send_sale_apart
-from app.object.models import CurrentStatus
+from app.object.models import CurrentStatus, ActionType
 from app.object.models.apartment import Apartment, ApartmentMedia
 from app.object.schemas.apartment import ApartmentCreate, ApartmentUpdate, ApartmentResponse
 from app.utils.file_utils import save_upload_file
@@ -58,13 +58,13 @@ async def create_apartment(
         await db.commit()
         await db.refresh(db_apartment)
 
-        if db_apartment.action_type == 'rent':
+        if db_apartment.action_type == ActionType.RENT:
             message = await send_rent_apart(db_apartment)
         else:
             message = await send_sale_apart(db_apartment, current_user.phone)
 
         background_tasks.add_task(send_message_to_channel, message, db_apartment.media,
-                                  CHANNEL_RENT_ID if db_apartment.action_type == 'rent' else CHANNEL_SALE_ID)
+                                  CHANNEL_RENT_ID if db_apartment.action_type == ActionType.RENT else CHANNEL_SALE_ID)
 
         apartment_response = ApartmentResponse.model_validate(db_apartment)
         return jsonable_encoder(apartment_response)

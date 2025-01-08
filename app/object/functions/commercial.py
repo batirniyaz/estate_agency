@@ -13,7 +13,7 @@ from app.config import CHANNEL_RENT_ID, CHANNEL_SALE_ID
 from app.object.functions import generate_crm_id
 from app.object.functions.validations.validate_media import validate_media
 from app.object.messages import send_sale_comm, send_rent_comm
-from app.object.models import CurrentStatus
+from app.object.models import CurrentStatus, ActionType
 from app.object.models.commercial import CommercialMedia, Commercial
 from app.object.schemas.commercial import CommercialCreate, CommercialResponse, CommercialUpdate
 from app.utils.file_utils import save_upload_file
@@ -59,13 +59,13 @@ async def create_commercial(
         await db.commit()
         await db.refresh(db_commercial)
 
-        if db_commercial.action_type == 'rent':
+        if db_commercial.action_type == ActionType.RENT:
             message = await send_rent_comm(db_commercial)
         else:
             message = await send_sale_comm(db_commercial, current_user.phone)
 
         background_tasks.add_task(send_message_to_channel, message, db_commercial.media,
-                                  CHANNEL_RENT_ID if db_commercial.action_type == 'rent' else CHANNEL_SALE_ID)
+                                  CHANNEL_RENT_ID if db_commercial.action_type == ActionType.RENT else CHANNEL_SALE_ID)
 
         commercial_response = CommercialResponse.model_validate(db_commercial)
         return jsonable_encoder(commercial_response)

@@ -13,7 +13,7 @@ from app.config import CHANNEL_RENT_ID, CHANNEL_SALE_ID
 from app.object.functions import generate_crm_id, house_condition_translation
 from app.object.functions.validations.validate_media import validate_media
 from app.object.messages import send_rent_land, send_sale_land
-from app.object.models import CurrentStatus
+from app.object.models import CurrentStatus, ActionType
 from app.object.models.land import LandMedia, Land
 from app.object.schemas.land import LandCreate, LandResponse, LandUpdate
 from app.utils.file_utils import save_upload_file
@@ -57,13 +57,13 @@ async def create_land(
         await db.commit()
         await db.refresh(db_land)
 
-        if db_land.action_type == 'rent':
+        if db_land.action_type == ActionType.RENT:
             message = await send_rent_land(db_land)
         else:
             message = await send_sale_land(db_land, current_user.phone)
 
         background_tasks.add_task(send_message_to_channel, message, db_land.media,
-                                  CHANNEL_RENT_ID if db_land.action_type == 'rent' else CHANNEL_SALE_ID)
+                                  CHANNEL_RENT_ID if db_land.action_type == ActionType.RENT else CHANNEL_SALE_ID)
 
         land_response = LandResponse.model_validate(db_land)
         return jsonable_encoder(land_response)
