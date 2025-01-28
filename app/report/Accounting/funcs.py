@@ -206,7 +206,7 @@ async def get_overall_data(
     months, total = await get_counts_by_month(db)
 
     if current_user.id == 11:
-        commission_count = sum([deal.agency_commission for deal in deals])
+        commission_count = sum(deal.agency_commission for deal in deals if deal.agency_commission is not None)
     else:
         commission_count = sum([deal.commission for deal in deals])
 
