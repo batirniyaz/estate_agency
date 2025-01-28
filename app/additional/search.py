@@ -42,9 +42,9 @@ async def search(db: AsyncSession, text: str, table: str):
 
 
 async def get_all_object(db: AsyncSession):
-    land_count_sale = await db.scalar(select(func.count(Land.id).where(Land.action_type == ActionType.SALE)))
-    apartment_count_sale = await db.scalar(select(func.count(Apartment.id).where(Apartment.action_type == ActionType.SALE)))
-    commercial_count_sale = await db.scalar(select(func.count(Commercial.id).where(Commercial.action_type == ActionType.SALE)))
+    land_count_sale = await db.scalar(select(func.count(Land.id)).where(Land.action_type == ActionType.SALE))
+    apartment_count_sale = await db.scalar(select(func.count(Apartment.id)).where(Apartment.action_type == ActionType.SALE))
+    commercial_count_sale = await db.scalar(select(func.count(Commercial.id)).where(Commercial.action_type == ActionType.SALE))
     land_count_rent = await db.scalar(select(func.count(Land.id)).where(Land.action_type == ActionType.RENT))
     apartment_count_rent = await db.scalar(select(func.count(Apartment.id)).where(Apartment.action_type == ActionType.RENT))
     commercial_count_rent = await db.scalar(select(func.count(Commercial.id)).where(Commercial.action_type == ActionType.RENT))
