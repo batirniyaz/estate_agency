@@ -14,7 +14,8 @@ async def create_deal(db: AsyncSession,
                      crm_id: str,
                      object_price: int,
                      commission: float,
-                     agent_percent: int):
+                     agent_percent: int,
+                     agency_commission: float):
     try:
         db_deal = Deal(action_type=action_type,
                        responsible=responsible,
@@ -22,7 +23,8 @@ async def create_deal(db: AsyncSession,
                        crm_id=crm_id,
                        object_price=object_price,
                        commission=commission,
-                       agent_percent=agent_percent)
+                       agent_percent=agent_percent,
+                       agency_commission=agency_commission)
         db.add(db_deal)
         await db.commit()
         await db.refresh(db_deal)
