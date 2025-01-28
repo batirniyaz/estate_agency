@@ -22,8 +22,8 @@ async def get_overall_data_api(
     date: Optional[str] = Query(None, description="Дата в формате YYYY-MM-DD или YYYY-MM или YYYY или YYYY-W52"),
     responsible: Optional[str] = None,
 ):
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Недостаточно прав")
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Недостаточно прав")
     
     return await get_overall_data(db=db, action_type=action_type if action_type else None,
                                   start_date=start_date if start_date else None,
