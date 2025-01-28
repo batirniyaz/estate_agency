@@ -6,6 +6,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.object.models import ActionType
 from app.object.models.apartment import Apartment
 from app.object.models.commercial import Commercial
 from app.object.models.land import Land
@@ -41,13 +42,22 @@ async def search(db: AsyncSession, text: str, table: str):
 
 
 async def get_all_object(db: AsyncSession):
-    land_count = await db.scalar(select(func.count(Land.id)))
-    apartment_count = await db.scalar(select(func.count(Apartment.id)))
-    commercial_count = await db.scalar(select(func.count(Commercial.id)))
+    land_count_sale = await db.scalar(select(func.count(Land.id).where(Land.action_type == ActionType.SALE)))
+    apartment_count_sale = await db.scalar(select(func.count(Apartment.id).where(Apartment.action_type == ActionType.SALE)))
+    commercial_count_sale = await db.scalar(select(func.count(Commercial.id).where(Commercial.action_type == ActionType.SALE)))
+    land_count_rent = await db.scalar(select(func.count(Land.id)).where(Land.action_type == ActionType.RENT))
+    apartment_count_rent = await db.scalar(select(func.count(Apartment.id)).where(Apartment.action_type == ActionType.RENT))
+    commercial_count_rent = await db.scalar(select(func.count(Commercial.id)).where(Commercial.action_type == ActionType.RENT))
 
     return {
-        "land": land_count,
-        "apartment": apartment_count,
-        "commercial": commercial_count,
-        "total": land_count + apartment_count + commercial_count
+        "land": land_count_rent+land_count_sale,
+        "apartment": apartment_count_rent+apartment_count_sale,
+        "commercial": commercial_count_rent+commercial_count_sale,
+        "total": land_count_sale + apartment_count_sale + commercial_count_sale + land_count_rent + apartment_count_rent + commercial_count_rent,
+        "land_rent": land_count_rent,
+        "apartment_rent": apartment_count_rent,
+        "commercial_rent": commercial_count_rent,
+        "land_sale": land_count_sale,
+        "apartment_sale": apartment_count_sale,
+        "commercial_sale": commercial_count_sale,
     }
