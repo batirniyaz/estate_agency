@@ -5,6 +5,8 @@ from sqlalchemy.future import select
 
 from app.object.models import ActionType
 from app.object.models.apartment import Apartment
+from app.object.models.commercial import Commercial
+from app.object.models.land import Land
 from app.report.deals.crud import create_deal
 from app.report.validations.view_validate import validate_view
 from app.report.views.model import View
@@ -21,8 +23,21 @@ async def create_view(db: AsyncSession, view: ViewCreate, bg_tasks: BackgroundTa
         if obj:
             view.owner_number = obj.phone_number
 
+    table_mapping = {
+        'A': Apartment,
+        'C': Commercial,
+        'L': Land
+    }
+    table_obj = table_mapping.get(view.crm_id[0])
+    res = await db.execute(select(table_obj).filter_by(id=int(view.crm_id[1:])))
+    obj = res.scalars().first()
+    if not obj:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Объект не найден")
+
     try:
-        view.commission = view.agent_percent * view.price / 100
+        commission = obj.agent_percent * view.price / 100
+        view.commission = view.agent_percent * commission / 100
+        agency_commission = commission - view.commission
 
         db_view = View(**view.model_dump())
         db.add(db_view)
@@ -32,7 +47,7 @@ async def create_view(db: AsyncSession, view: ViewCreate, bg_tasks: BackgroundTa
         if db_view.status_deal:
             bg_tasks.add_task(create_deal, db=db, action_type=db_view.action_type, responsible=db_view.responsible,
                               date=db_view.date, crm_id=db_view.crm_id, object_price=db_view.price,
-                              commission=db_view.commission, agent_percent=db_view.agent_percent)
+                              commission=db_view.commission, agent_percent=db_view.agent_percent, agency_commission=agency_commission)
 
         return db_view
     except Exception as e:
@@ -75,12 +90,25 @@ async def update_view(db: AsyncSession, view_id: int, view: ViewUpdate, current_
         if obj:
             view.owner_number = obj.phone_number
 
+    table_mapping = {
+        'A': Apartment,
+        'C': Commercial,
+        'L': Land
+    }
+    table_obj = table_mapping.get(view.crm_id[0])
+    res = await db.execute(select(table_obj).filter_by(id=int(view.crm_id[1:])))
+    obj = res.scalars().first()
+    if not obj:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Объект не найден")
+
     try:
 
         for key, value in view.model_dump(exclude_unset=True).items():
             setattr(db_view, key, value)
 
-        db_view.commission = db_view.agent_percent * db_view.price / 100
+        commission = obj.agent_percent * view.price / 100
+        view.commission = view.agent_percent * commission / 100
+        agency_commission = commission - view.commission
 
         await db.commit()
         await db.refresh(db_view)
@@ -88,7 +116,8 @@ async def update_view(db: AsyncSession, view_id: int, view: ViewUpdate, current_
         if db_view.status_deal:
             bg_tasks.add_task(create_deal, db=db, action_type=db_view.action_type, responsible=db_view.responsible,
                               date=db_view.date, crm_id=db_view.crm_id, object_price=db_view.price,
-                              commission=db_view.commission, agent_percent=db_view.agent_percent)
+                              commission=db_view.commission, agent_percent=db_view.agent_percent,
+                              agency_commission=agency_commission)
 
         return db_view
     except Exception as e:
