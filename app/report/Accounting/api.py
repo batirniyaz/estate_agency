@@ -25,4 +25,8 @@ async def get_overall_data_api(
     if not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Недостаточно прав")
     
-    return await get_overall_data(db, action_type, start_date, end_date, date, responsible)
+    return await get_overall_data(db=db, action_type=action_type if action_type else None,
+                                  start_date=start_date if start_date else None,
+                                  end_date=end_date if end_date else None, date=date if date else None,
+                                  responsible=responsible if responsible else None,
+                                  current_user=current_user)
