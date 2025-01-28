@@ -69,10 +69,11 @@ async def get_counts_by_month(db):
 async def get_overall_data(
     db: AsyncSession,
     action_type: ActionType,
+    current_user,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     date: Optional[str] = None,
-    responsible: Optional[str] = None
+    responsible: Optional[str] = None,
 ):
     print(start_date, end_date, date)
     if start_date and not end_date:
@@ -204,9 +205,14 @@ async def get_overall_data(
 
     months, total = await get_counts_by_month(db)
 
+    if current_user.id == 11:
+        commission_count = sum([deal.agency_commission for deal in deals])
+    else:
+        commission_count = sum([deal.commission for deal in deals])
+
     return {
         "deals": deals, "deals_count": len(deals), "views": views, "views_count": len(views),
-        "clients": clients, "clients_count": len(clients), "commission_count": sum([deal.commission for deal in deals]),
+        "clients": clients, "clients_count": len(clients), "commission_count": commission_count,
         "hot_count": len([client for client in clients if client.client_status == ClientStatus.HOT]),
         "cold_count": len([client for client in clients if client.client_status == ClientStatus.COLD]),
         "all_objects": len(lands) + len(apartments) + len(commercials), "months": months, "total": total
