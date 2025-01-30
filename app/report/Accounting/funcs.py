@@ -186,12 +186,13 @@ async def get_overall_data(
             responsible = current_user.full_name
 
     if responsible:
-        deal_query = deal_query.filter(Deal.responsible == responsible)
-        view_query = view_query.filter(View.responsible == responsible)
-        client_query = client_query.filter(Client.responsible == responsible)
-        land_query = land_query.filter(Land.responsible == responsible)
-        apartment_query = apartment_query.filter(Apartment.responsible == responsible)
-        commercial_query = commercial_query.filter(Commercial.responsible == responsible)
+        if not current_user.id == 11:
+            deal_query = deal_query.filter(Deal.responsible == responsible)
+            view_query = view_query.filter(View.responsible == responsible)
+            client_query = client_query.filter(Client.responsible == responsible)
+            land_query = land_query.filter(Land.responsible == responsible)
+            apartment_query = apartment_query.filter(Apartment.responsible == responsible)
+            commercial_query = commercial_query.filter(Commercial.responsible == responsible)
 
     db_deals = await db.execute(deal_query)
     db_views = await db.execute(view_query)
@@ -208,10 +209,15 @@ async def get_overall_data(
     commercials = db_commercials.scalars().all()
 
     months, total = await get_counts_by_month(db)
+    print(current_user.full_name)
+    print(responsible)
 
+    # if current_user.id == 11 and responsible == current_user.full_name:
+    #     commission_count = sum(deal.agency_commission for deal in deals if deal.agency_commission is not None)
     if current_user.id == 11:
         commission_count = sum(deal.agency_commission for deal in deals if deal.agency_commission is not None)
     else:
+        print("I am in three")
         commission_count = sum([deal.commission for deal in deals])
 
     return {
