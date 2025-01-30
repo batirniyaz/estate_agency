@@ -40,6 +40,8 @@ async def filter_objects(
         location_land: Optional[LocationLand] = None,
         parking_place: Optional[bool] = None,
         responsible: Optional[str] = None,
+        limit: Optional[int] = None,
+        page: Optional[int] = None
 ):
     table_mapping = {
         "land": Land,
@@ -147,6 +149,9 @@ async def filter_objects(
         stmt = stmt.where(and_(table_obj.responsible == responsible))
 
     stmt = stmt.order_by(table_obj.id.desc())
+
+    if limit and page:
+        stmt = stmt.limit(limit).offset((page - 1) * limit)
 
     result = await db.execute(stmt)
     return result.scalars().all()
