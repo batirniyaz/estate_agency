@@ -181,6 +181,10 @@ async def get_overall_data(
             commercial_query = commercial_query.filter(Commercial.created_at >= start_date_obj,
                                                        Commercial.created_at <= end_date_obj)
 
+    if not responsible:
+        if not current_user.id == 11:
+            responsible = current_user.full_name
+
     if responsible:
         deal_query = deal_query.filter(Deal.responsible == responsible)
         view_query = view_query.filter(View.responsible == responsible)
