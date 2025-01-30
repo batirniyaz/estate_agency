@@ -181,12 +181,11 @@ async def get_overall_data(
             commercial_query = commercial_query.filter(Commercial.created_at >= start_date_obj,
                                                        Commercial.created_at <= end_date_obj)
 
-    if not responsible:
-        if not current_user.id == 11:
-            responsible = current_user.full_name
+    if not current_user.is_superuser:
+        responsible = current_user.full_name
 
     if responsible:
-        if not current_user.id == 11:
+        if not current_user.id == 11 and responsible == current_user.full_name:
             deal_query = deal_query.filter(Deal.responsible == responsible)
             view_query = view_query.filter(View.responsible == responsible)
             client_query = client_query.filter(Client.responsible == responsible)
@@ -209,12 +208,10 @@ async def get_overall_data(
     commercials = db_commercials.scalars().all()
 
     months, total = await get_counts_by_month(db)
-    print(current_user.full_name)
-    print(responsible)
 
-    # if current_user.id == 11 and responsible == current_user.full_name:
-    #     commission_count = sum(deal.agency_commission for deal in deals if deal.agency_commission is not None)
-    if current_user.id == 11:
+    if current_user.id == 11 and responsible == current_user.full_name:
+        commission_count = sum(deal.agency_commission for deal in deals if deal.agency_commission is not None)
+    elif current_user.id == 11:
         commission_count = sum(deal.agency_commission for deal in deals if deal.agency_commission is not None)
     else:
         print("I am in three")
