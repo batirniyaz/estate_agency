@@ -97,7 +97,9 @@ async def filter_objects_endpoint(
         location_commercial: LocationCommercial = Query(None, title="Commercial location", description="Commercial location. Only comm"),
         location_land: LocationLand = Query(None, title="Land location", description="Land location. Only land"),
         parking_place: bool = Query(None, title="Parking place", description="Parking place availability. Only comm and land"),
-        responsible: str = Query(None, title="Responsible", description="Responsible name. Each one")
+        responsible: str = Query(None, title="Responsible", description="Responsible name. Each one"),
+        limit: int = Query(None, title="Limit", description="Limit of objects to get"),
+        page: int = Query(None, title="Page", description="Page number")
 ):
     return await filter_objects(
         db=db, table=table,
@@ -124,5 +126,7 @@ async def filter_objects_endpoint(
         location_commercial=location_commercial if location_commercial else None,
         location_land=location_land if location_land else None,
         parking_place=parking_place if parking_place else None,
-        responsible=responsible if responsible else None
+        responsible=responsible if responsible else None,
+        limit=limit if limit else None,
+        page=page if page else None
     )
