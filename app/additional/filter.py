@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -150,8 +150,16 @@ async def filter_objects(
 
     stmt = stmt.order_by(table_obj.id.desc())
 
+    count_stmt = stmt.with_only_columns(func.count()).order_by(None)
+    filtered_count = await db.scalar(count_stmt)
+
     if limit and page:
         stmt = stmt.limit(limit).offset((page - 1) * limit)
 
     result = await db.execute(stmt)
-    return result.scalars().all()
+    objects = result.scalars().all()
+
+    return {
+        "filtered_count": filtered_count,
+        "objects": objects
+    }
